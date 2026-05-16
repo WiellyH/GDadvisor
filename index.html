@@ -322,10 +322,55 @@ VEELVOORKOMENDE PROBLEMEN:
 - Internervenale vergeling (gele bladeren met groene nerven) → Ca/Mg gebrek → BioBizz CalMag
 - Punten verbranden bij voldoende afstand → voedingstoxiciteit → spoel + verlaag EC
 
+LICHT BEREKENING — gebruik ALTIJD grid-logica, niet alleen wattage:
+
+STAP 1: Bepaal dekking per lamp
+- 720W LED: dekt 1.2m × 1.2m per lamp
+- 480W LED: dekt 1.0m × 1.0m per lamp
+- 360W LED: dekt 0.9m × 0.9m per lamp
+- 240W LED: dekt 0.8m × 0.8m per lamp
+- 180W LED: dekt 0.7m × 0.7m per lamp
+- 600W HPS: dekt 1.0m × 1.0m tot 1.2m × 1.2m
+- 1000W HPS: dekt 1.2m × 1.2m tot 1.5m × 1.5m
+
+STAP 2: Denk als een kweker — plan looppaden in, niet alleen wiskunde
+
+LOOPPAD LOGICA — essentieel voor professionele kweekruimtes:
+In een kweekruimte heb je een looppad nodig om bij de planten te kunnen.
+Dit betekent dat je de breedte nooit volledig vol hangt met lampen.
+
+Voorbeeld 3×6m ruimte met 720W lampen (1.2m × 1.2m dekking):
+- Breedte 3m: 2 rijen lampen van 1.2m + looppad van 0.6m in het midden
+- Lengte 6m: 6m ÷ 1.2m = 5 lampen per rij
+- Resultaat: 2 rijen × 5 lampen = 10 lampen ✓
+- Looppad: 0.6m in het midden over de volledige lengte
+- NOOIT 3 rijen in een 3m brede ruimte — dan is er geen looppad!
+
+PRAKTISCHE GRID VOORBEELDEN met 720W (1.2m dekking):
+- 2×4m: 1 rij × 3 lampen = 3 (smal, looppad aan zijkant)
+- 3×3m: 2 rijen × 2 lampen = 4 (looppad 0.6m midden)
+- 3×6m: 2 rijen × 5 lampen = 10 ✓ (looppad 0.6m midden)
+- 4×4m: 2 rijen × 3 lampen = 6 (looppad 1.6m midden)
+- 4×8m: 2 rijen × 6 lampen = 12 (looppad midden)
+- 5×5m: 2 rijen × 4 lampen = 8 of 3 rijen × 4 = 12 (looppad aan zijkant)
+- 6×6m: 2 rijen × 5 lampen = 10 (breed looppad) of 4 rijen × 5 = 20 (2 looppaden)
+- 5×10m: 2 rijen × 8 lampen = 16 (looppad midden)
+- 10×10m: 4 rijen × 8 lampen = 32 (2 looppaden)
+
+REGEL: Denk eerst aan de praktische indeling — hoe loopt de kweker erdoor?
+- Smalle ruimte (<4m breed): altijd 2 rijen met looppad in het midden
+- Brede ruimte (>4m): meerdere bedden mogelijk met looppaden ertussen
+- Vermeld altijd: "X rijen × Y lampen per rij = Z lampen totaal, looppad van Xm"
+- Geef ook aan hoe de ventilatie en afzuiging hierop aangepast moet worden
+
 VENTILATIE VUISTREGEL:
-- Tent volume (m³) × 60 = benodigde m³/h afzuiger
-- 80×80×180: 0.8×0.8×1.8 = 1.15m³ × 60 = 69m³/h minimum, kies 100-150m³/h
-- Bij HPS: altijd 1 maat zwaarder vanwege warmteontwikkeling
+- Tent volume (m³) × 60 = benodigde m³/h afzuiger (wissel lucht elke minuut)
+- Kleine tent 80×80×180: 0.8×0.8×1.8 = 1.15m³ × 60 = 69m³/h → kies 130-200m³/h
+- Medium tent 120×120×200: 1.2×1.2×2.0 = 2.88m³ × 60 = 173m³/h → kies 200-300m³/h
+- Grote ruimte 3×6×3m: 3×6×3 = 54m³ × 60 = 3240m³/h → meerdere grote afzuigers
+- Professionele ruimte: per 50m³ één afzuiger van 1500-2000m³/h
+- Bij HPS: altijd 1.5× de berekende capaciteit vanwege extra warmte
+- Bij LED grote ruimtes: ook zware ventilatie nodig voor CO2 aanvoer
 - Luchtvochtigheid: groeifase 50-70% | bloeifase 40-50% | laatste weken <45%
 - Temperatuur: dag 20-28°C | nacht 18-22°C | HPS tent maximaal 28°C
 
@@ -377,7 +422,11 @@ REGELS voor vragen:
 - Als je al een offerte hebt gemaakt: stel hooguit 1 korte vervolgvraag
 - Liever te weinig vragen dan te veel — bouw snel naar een offerte toe
 
-BELANGRIJK: 
+BELANGRIJK:
+- Bij vervolgvragen: voeg toe aan de offerte of update bestaande producten — NOOIT de hele offerte weggooien
+- Als iemand zegt "gebruik coco": voeg coco medium toe, verwijder aarde, rest blijft staan
+- Als iemand een vraag beantwoordt: update alleen het relevante deel van de offerte
+- Stuur altijd de COMPLETE bijgewerkte products array terug, inclusief producten die al in de offerte staan
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
 - Alle URLs zijn van growdeal.nl (Nederlandse site) — NOOIT zelf een URL verzinnen
 - URL formaat is ALTIJD: https://www.growdeal.nl/[slug]/ ZONDER /product/ erin
@@ -395,11 +444,13 @@ const inputEl = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
 const CTX_RE = [
-  {re:/\b(40[×x]40|60[×x]60|80[×x]80|100[×x]100|120[×x]120)\b/i, key:'📐 ruimte'},
+  {re:/\b(40[×x]40|60[×x]60|80[×x]80|100[×x]100|120[×x]120|150[×x]150|240[×x]240|240[×x]120)\b/i, key:'📐 ruimte'},
+  {re:/\b(\d+)\s*[×xX]\s*(\d+)\s*m\b/i, key:'📐 ruimte', fmt:m=>m[1]+'×'+m[2]+'m'},
   {re:/\b(LED|HPS|CMH|LEC)\b/i, key:'💡 licht'},
   {re:/€\s*(\d[\d.]*)/i, key:'💶 budget', fmt:m=>'€'+m[1]},
   {re:/\b(aarde|coco|hydro)\b/i, key:'🌱 medium'},
   {re:/\b(beginner|gevorderd|professional|onervaren)\b/i, key:'🎓 niveau'},
+  {re:/\b(\d+)\s*plant/i, key:'🪴 planten', fmt:m=>m[1]+' planten'},
 ];
 
 function extractCtx(text) {
@@ -573,6 +624,23 @@ function renderProducts(products, seo) {
   const fmt = '€' + total.toFixed(0);
   document.getElementById('total-price').textContent = fmt;
   pill.textContent = fmt; pill.style.display = 'inline-block';
+}
+
+function mergeProducts(newProds) {
+  // Add new products, update existing ones by name, never wipe the list
+  newProds.forEach(function(np) {
+    var existing = offerteProds.findIndex(function(op) {
+      return op.name && np.name && op.name.toLowerCase() === np.name.toLowerCase();
+    });
+    if (existing >= 0) {
+      // Update existing product
+      offerteProds[existing] = Object.assign(offerteProds[existing], np);
+    } else {
+      // Add new product
+      offerteProds.push(np);
+    }
+  });
+  renderProducts(offerteProds, null);
 }
 
 function addToCart(idx) {
@@ -775,7 +843,7 @@ async function sendMessage() {
     history.push({role:'assistant', content:raw});
     
     if (jsonData && jsonData.products) {
-      renderProducts(jsonData.products, jsonData.seo);
+      mergeProducts(jsonData.products);
     }
   } catch(e) {
     removeTyping();
