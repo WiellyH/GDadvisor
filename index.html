@@ -371,9 +371,11 @@ Welk lichttype?
 
 REGELS voor vragen:
 - Begin elke keuzeregel ALTIJD met → (pijl naar rechts)
-- Nooit meer dan 2 vragen tegelijk stellen
+- Stel MAXIMAAL 1 vraag per beurt — nooit meer
 - Vraag nooit iets wat je al weet uit de context
-- Na het antwoord van de klant: update de offerte direct
+- Na 2-3 beantwoorde vragen: bouw direct een complete offerte, stop met vragen
+- Als je al een offerte hebt gemaakt: stel hooguit 1 korte vervolgvraag
+- Liever te weinig vragen dan te veel — bouw snel naar een offerte toe
 
 BELANGRIJK: 
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
@@ -451,10 +453,13 @@ function addMsg(role, text) {
 }
 
 function pickChoice(btn) {
-  btn.closest('.choices').querySelectorAll('.choice-btn').forEach(function(b) {
-    b.disabled = true; b.style.opacity = '0.5';
+  // Disable ALL choice groups in the conversation (prevent double answering)
+  document.querySelectorAll('.choice-btn').forEach(function(b) {
+    b.disabled = true; b.style.opacity = '0.4';
   });
+  // Highlight selected
   btn.style.opacity = '1'; btn.style.background = 'var(--green)'; btn.style.color = '#fff';
+  // Send as message
   inputEl.value = btn.textContent;
   sendMessage();
 }
