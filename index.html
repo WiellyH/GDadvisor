@@ -492,7 +492,7 @@ async function sendMessage() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 2000,
+        max_tokens: 3000,
         system: getSystem(),
         messages: history
       })
@@ -502,14 +502,26 @@ async function sendMessage() {
     const raw = data.content?.find(b=>b.type==='text')?.text || (data.error ? `API fout: ${data.error.message}` : 'Er ging iets mis.');
     
     // Parse JSON from response
-    const m1 = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
-    const m2 = raw.match(/```json\s*([\s\S]*?)```/s);
-    const m3 = raw.match(/(\{[\s\S]*?"products"[\s\S]*\})/s);
-    const cand = (m1&&m1[1]||m2&&m2[1]||m3&&m3[1]||'').trim();
+    // Parse JSON - no /s flag for max browser compat
     let jsonData = null;
-    if (cand) { try { const p = JSON.parse(cand); if(p&&p.products) jsonData = p; } catch(e) { try { const p = JSON.parse(cand.replace(/,\s*}/g,'}').replace(/,\s*]/g,']')); if(p&&p.products) jsonData=p; } catch(e2) {} } }
-    
-    const chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/gs,'').trim();
+    let chatText = raw;
+    const tagMatch = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
+    const tickMatch = raw.match(/```json([\s\S]*?)```/);
+    const bareMatch = raw.match(/\{"seo"[\s\S]*?"products"[\s\S]*?\}\s*\]/);
+    const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : null;
+    if (rawCand) {
+      const cand = rawCand.trim();
+      try {
+        const p = JSON.parse(cand);
+        if (p && p.products) { jsonData = p; chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim(); }
+      } catch(e) {
+        try {
+          const fixed = cand.replace(/,(\s*[}\]])/g,'$1');
+          const p = JSON.parse(fixed);
+          if (p && p.products) { jsonData = p; chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim(); }
+        } catch(e2) { console.error('JSON parse failed:', e2.message, cand.slice(0,200)); }
+      }
+    }
     
     extractCtx(chatText);
     addMsg('assistant', chatText);
