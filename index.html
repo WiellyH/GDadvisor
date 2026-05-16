@@ -136,7 +136,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 </div>
 <script>
 const WORKER = 'https://workers-playground-raspy-tooth-3aae.wielly.workers.dev';
-const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdealz.de.
+
+// Load full product catalog from products.json
+let CATALOG = [];
+fetch('products.json')
+  .then(r => r.json())
+  .then(data => { CATALOG = data; console.log('✅ Catalog loaded:', data.length, 'products'); })
+  .catch(e => console.warn('Could not load products.json:', e));
+
+// Search catalog by keywords, return top N matches
+function searchProducts(query, n = 20) {
+  if (!CATALOG.length) return [];
+  const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  return CATALOG
+    .filter(p => p.s) // in stock only
+    .map(p => {
+      const text = p.k.toLowerCase();
+      const score = terms.reduce((s, t) => s + (text.includes(t) ? 1 : 0), 0);
+      return { ...p, score };
+    })
+    .filter(p => p.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, n);
+}
+
+// Build a mini catalog string from search results to inject into system prompt
+function buildContextCatalog(query) {
+  const results = searchProducts(query, 25);
+  if (!results.length) return '';
+  const lines = results.map(p => `- ${p.n} | ${p.p} | ${p.d} | URL: ${p.u} | IMG: ${p.i}`);
+  return '\n\nRELEVANTE PRODUCTEN VOOR DEZE VRAAG (uit volledige catalog van 845 producten):\n' + lines.join('\n');
+}
+const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdeal.nl.
 
 TOON: Vriendelijk, deskundig, praktisch. Niet te formeel. Geen harde verkooptaal.
 TAAL: Altijd in de taal van de gebruiker. Standaard Nederlands.
@@ -177,9 +208,9 @@ Het JSON blok heeft deze structuur:
 <<<JSON>>>
 {
   "seo": {
-    "title": "Setup titel in het Duits voor growdealz.de",
+    "title": "Setup titel in het Duits voor growdeal.nl",
     "desc": "SEO beschrijving 80 woorden Duits",
-    "url": "growdealz.de/setup/[ruimte]-[licht]-[medium]-[ervaring]",
+    "url": "growdeal.nl/setup/[ruimte]-[licht]-[medium]-[ervaring]",
     "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "keyword6"]
   },
   "products": [
@@ -188,7 +219,7 @@ Het JSON blok heeft deze structuur:
       "name": "Dutch Masters ECO Growzelt 80×80×180cm",
       "price": "€79",
       "reason": "Perfecte maat voor jouw ruimte",
-      "url": "https://www.growdealz.de/growbox/",
+      "url": "https://www.growdeal.nl/growbox/",
       "img": "https://www.growdeal.nl/wp-content/uploads/...",
       "emoji": "🏕️"
     }
@@ -401,9 +432,10 @@ function renderCtx() {
   bar.className = Object.keys(ctx).length ? 'active' : '';
 }
 
-function getSystem() {
+function getSystem(query) {
   const ctxStr = Object.keys(ctx).length ? Object.entries(ctx).map(([k,v])=>`${k}: ${v}`).join(' | ') : 'geen context';
-  return SYSTEM.replace('{CONTEXT}', ctxStr);
+  const dynamicCatalog = query ? buildContextCatalog(query) : '';
+  return SYSTEM.replace('{CONTEXT}', ctxStr) + dynamicCatalog;
 }
 
 function addMsg(role, text) {
@@ -526,7 +558,7 @@ async function sendMessage() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 3000,
-        system: getSystem(),
+        system: getSystem(text),
         messages: history
       })
     });
