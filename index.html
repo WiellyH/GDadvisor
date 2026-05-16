@@ -408,7 +408,8 @@ function getSystem() {
 function addMsg(role, text) {
   const d = document.createElement('div');
   d.className = `msg ${role}`;
-  d.innerHTML = `<div class="avatar">${role==='user'?'JIJ':'GD'}</div><div class="bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  d.innerHTML = `<div class="avatar">${role==='user'?'JIJ':'GD'}</div><div class="bubble">${formatted}</div>`;
   msgEl.appendChild(d);
   msgEl.scrollTop = msgEl.scrollHeight;
 }
@@ -460,7 +461,7 @@ function renderProducts(products, seo) {
   products.forEach(p => {
     total += parsePrice(p.price);
     const imgHtml = p.img 
-      ? `<img class="product-img" src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">`
+      ? `<img class="product-img" src="${p.img}" alt="${p.name}" onerror="this.outerHTML='<div class=\'product-emoji\'>${p.emoji||getEmoji(p.category)}</div>'">`
       : `<div class="product-emoji">${p.emoji||getEmoji(p.category)}</div>`;
     const card = document.createElement('div');
     card.className = 'product-card';
