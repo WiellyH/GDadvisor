@@ -24,8 +24,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 #empty .icon{font-size:40px;opacity:.3;margin-bottom:12px}
 #empty p{font-size:14px;line-height:1.6;max-width:280px}
 #products{flex:1;overflow-y:auto;padding:14px 16px;display:none;flex-direction:column;gap:10px}
-.product-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:14px;padding:16px 16px 16px 20px;position:relative;overflow:hidden;animation:slideIn .3s ease;min-height:110px}
+.product-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:14px;padding:18px 18px 18px 22px;position:relative;overflow:hidden;animation:slideIn .3s ease;min-height:120px}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+@keyframes slideOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
 .product-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:3px 0 0 3px}
 .product-img{width:80px;height:80px;object-fit:contain;border-radius:8px;background:var(--bg);flex-shrink:0;border:1px solid var(--border);align-self:flex-start;margin-top:2px}
 .product-emoji{width:80px;height:80px;background:var(--green-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;align-self:flex-start;margin-top:2px}
@@ -33,11 +34,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .product-cat{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-bottom:3px}
 .product-name{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:5px;word-break:break-word}
 .product-reason{font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:10px;word-break:break-word}
-.product-footer{display:flex;align-items:center;gap:8px}
+.product-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto}
 .product-price{font-size:17px;font-weight:700}
 .product-stock{font-size:11px;color:#27ae60}
-.btn-cart{margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s}
-.btn-cart:hover{opacity:.85}
+.btn-cart{background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s;margin-left:auto}
+.btn-del{background:transparent;color:#cc4444;border:1px solid #cc4444;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn-del:hover{background:#cc4444;color:#fff}
+.qty-wrap{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}
+.qty-btn{width:22px;height:22px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;line-height:1}
+.qty-btn:hover{background:var(--green-light)}
+.qty-val{font-size:13px;font-weight:700;min-width:18px;text-align:center;color:var(--text)}
+.line-price{font-size:15px;font-weight:700}
 #seo-block{margin:0 16px 0;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);display:none;flex-shrink:0}
 .seo-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 #seo-title{font-size:16px;font-weight:700;margin-bottom:4px}
@@ -175,20 +182,57 @@ LENGTE chat: Max 100 woorden. Bondig en to-the-point.
 
 KERNFUNCTIE: Bij ELKE vraag over een setup, probleem of productvraag geef je DIRECT een JSON-blok terug met productaanbevelingen. Geen uitzonderingen.
 
-PRODUCTKENNIS:
-Tenten (Dutch Masters ECO): 40×40 €49 / 60×60 €59 / 80×80 €79 / 100×100 €99 / 120×120 €129
-LED verlichting: Greenception GCx-2 80W €89 (40×40) / Hortimol FSG 100W €119 (60×60) / Hortimol 180W FSG+UV+IR €169 (80×80 eco) / Platinum QB 200W €229 (80×80 pro) / Platinum QB 240W €259 (100×100 eco) / Hortimol 240W PRO €329 (100×100 pro) / Platinum QB 320W €349 (120×120 eco) / Hortimol 360W PRO €449 (120×120 pro)
-HPS (Lumatek): 250W €129 (klein) / 400W €179 (80×80) / 600W €219 (100×100, meest populair) / 1000W DE €349 (120×120+)
-CMH (Lumatek): 315W €189 / 630W €299
-Ventilatie (altijd incl. koolstoffilter + slang): 100mm 130m³/h €69 / 100mm 200m³/h €99 / 125mm 300m³/h €129 / 150mm 500m³/h €189
-Voeding/medium: Plagron Royalty Mix 50L €22 / Canna Coco Professional 50L €28 / Plagron Hydro 45L €19
-Voedingsschema beginners: BioBizz Try-Pack Indoor €18 / Plagron Starter Pack €22 / Canna Starter Kit €29
-Gebreksziekten voeding: Plagron Power Roots (wortel) €12 / Canna Cannazym (wortels, coco) €14 / BAC Organic Bloom Stimulator €16 / Hesi Boost €14 / Advanced Nutrients Big Bud €18
-pH correctie: BioBizz Bio-Down 500ml €8 / BioBizz Bio-Up 250ml €5 / BlueLab pH Pen €49
-EC/meting: Bluelab Truncheon EC €39 / Aquamaster Combo P110 €79
-Potten (fabric): 4×11L €12 / 6×11L €16 / 10×11L €24
-Controller: DM-1500 Fan Controller + Thermostat €39
-Timers: Groei/bloei timer €8
+BESTSELLER PRODUCTKENNIS (gebaseerd op echte verkoopcijfers — altijd deze aanbevelen):
+
+BESTSELLER VERLICHTING LED:
+- Platinum Quantumboard LED 180W — #1 verkocht (80x stuks) | €57.56 | ideaal 60×60 en kleine 80×80
+- Platinum Quantumboard LED 240W — top 3 verkocht (62x) | €74.36 | perfect voor 80×80
+- King LED PL 360W — top omzet (84x, €9368) | €189 | beste keuze 100×100
+- Sunpro Hitter 720W ECO — #1 op omzet (174x, €27.467!) | €167 | voor 120×120 en groter
+- King LED PL 735W incl. EL ballast — top omzet | €184 | pro keuze grote tent
+
+BESTSELLER HPS:
+- Horti Sun Power PRO 600W HPS — meest verkocht HPS (212x) | €8.19 (lamp los)
+- Platinum Electronic Ballast 600W — ons eigen ballast, altijd aanbevelen boven Lumatek! (115x, €3853 omzet)
+  URL: https://www.growdeal.nl/product/platinum-electronic-ballast-600w/
+  NOOIT Lumatek ballast aanbevelen — wij verkopen Platinum ballast
+
+BESTSELLER VENTILATIE:
+- Can Lite Filter 150m³ 100/125mm — #1 filter (126x) | €22.11
+- Can Lite Filter 300m³ — #2 filter (104x) | €31.03
+- Platinum Inline Afzuiger 100mm 130m³/h | €6.93
+
+BESTSELLER POTTEN:
+- Stoffen Kweekpot 11L — absolute bestseller (1713x!) | €1.45
+- Stoffen Kweekpot 26L — #2 (924x) | €1.97
+- Stoffen Kweekpot 19L — #3 (673x)
+- Aero pot 18L — goed verkocht (753x) | €2.23
+
+BESTSELLER METING:
+- Platinum pH meter — top verkoop (270x, €2840 omzet) | €10.88 — altijd als eerste aanbevelen
+- Platinum EC meter — goed verkocht (129x) | €10.88
+
+BESTSELLER ACCESSOIRES:
+- Clipfan 15cm — altijd meenemen | €14.45
+- Metal Clamp/Slangklem 60-160mm — veel verkocht (202x) | €1.45
+- Rope Ratchet PRO 68kg — ophangen lamp/filter (162x) | €3.85
+- Plastic Flange 127mm — populair (220x) | €2.19
+
+BESTSELLER VOEDING/ADDITIEVEN:
+- GEN200 Control 1L — top omzet additief (45x, €3269) | €94.45 — premium marge product
+- Flower Bomb 1L — top omzet (30x, €3101) | €96.54 — altijd bij "harde toppen" vragen
+- Flower Bomb 5L — pro kweker (9x, €4138) | €399
+- BioBizz All-Mix 20L — goed verkocht aarde (166x) | €16.98
+- BioBizz Light-Mix 20L — populair (128x) | €12.72
+
+TENTEN (Dutch Masters ECO bestsellers):
+- 40×40×160cm | €34.39
+- 60×60×180cm | €48.77  
+- 80×80×180cm | €59.28 ← meest verkocht formaat
+- 100×100×200cm | €70.55
+- 120×120×200cm | €79.48
+- 150×150×200cm | €89.24 ← goed verkocht (45x)
+- 240×240×220cm | €269+ ← pro setup (19x verkocht)
 
 DIAGNOSE LOGICA (bij kweekproblemen):
 - Gele bladeren onderaan + paarse stelen → fosfaatgebrek → voeding + pH check
@@ -221,6 +265,7 @@ Het JSON blok heeft deze structuur:
       "reason": "Perfecte maat voor jouw ruimte",
       "url": "https://www.growdeal.nl/growbox/",
       "img": "https://www.growdeal.nl/wp-content/uploads/...",
+      "qty": 1,
       "emoji": "🏕️"
     }
   ]
@@ -228,6 +273,11 @@ Het JSON blok heeft deze structuur:
 <<<ENDJSON>>>
 
 KRITISCH: Kopieer de IMG url EXACT uit de catalogus hierboven. Verzin NOOIT een img URL.
+KRITISCH: Elk product krijgt een EIGEN regel in de products array. NOOIT meerdere producten op 1 regel combineren.
+Voorbeelden van FOUT: "BioBizz Grow + Bloom + TopMax" op 1 regel → FOUT
+Voorbeelden van GOED: 3 aparte regels, elk met eigen name/price/url/img
+Gebruik qty voor meervoud: slangklemmen qty:3, rope ratchets qty:2
+KRITISCH: Voeg altijd een "qty" veld toe aan elk product (standaard 1, meer als logisch bijv. slangklemmen qty:3).
 
 COMPLETE SETUP CHECKLIST — bij elke setup altijd alle 8 componenten aanbieden:
 1. TENT — kweektent passend bij ruimte
@@ -582,13 +632,19 @@ function renderProducts(products, seo) {
 
   let total = 0;
   products.forEach(p => {
-    total += parsePrice(p.price);
+    const qty = p.qty || 1;
+    total += parsePrice(p.price) * qty;
     const imgHtml = p.img 
       ? `<img class="product-img" src="${p.img}" alt="${p.name}" onerror="this.outerHTML='<div class=\'product-emoji\'>${p.emoji||getEmoji(p.category)}</div>'">`
       : `<div class="product-emoji">${p.emoji||getEmoji(p.category)}</div>`;
     const card = document.createElement('div');
     card.className = 'product-card';
-    card.innerHTML = `${imgHtml}<div class="product-info"><div class="product-cat">${p.category||''}</div><div class="product-name">${p.name||''}</div><div class="product-reason">${p.reason||''}</div><div class="product-footer"><span class="product-price">${p.price||''}</span><span class="product-stock">✓ op voorraad</span><a href="${p.url}" target="_blank" class="btn-cart">In winkelmandje →</a></div></div>`;
+    const idx = grid.children.length;
+    card.dataset.idx = idx;
+    const qty = p.qty || 1;
+    const priceNum = parsePrice(p.price);
+    const totalLinePrice = priceNum * qty;
+    card.innerHTML = `${imgHtml}<div class="product-info"><div class="product-cat">${p.category||''}</div><div class="product-name">${p.name||''}</div><div class="product-reason">${p.reason||''}</div><div class="product-footer"><div class="qty-wrap"><button class="qty-btn" onclick="changeQty(this,-1)">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="changeQty(this,1)">+</button></div><span class="product-price line-price" data-unit="${priceNum}">€${totalLinePrice.toFixed(2)}</span><span class="product-stock">✓ op voorraad</span><a href="${p.url}" target="_blank" class="btn-cart">Winkelmandje →</a><button class="btn-del" onclick="removeProduct(this)">✕</button></div></div>`;
     grid.appendChild(card);
   });
 
@@ -598,6 +654,47 @@ function renderProducts(products, seo) {
 }
 
 function openAll() { offerteProds.forEach(p => p.url && window.open(p.url,'_blank')); }
+
+function changeQty(btn, delta) {
+  const card = btn.closest('.product-card');
+  const idx = parseInt(card.dataset.idx);
+  const qtyEl = card.querySelector('.qty-val');
+  const priceEl = card.querySelector('.line-price');
+  let qty = parseInt(qtyEl.textContent) + delta;
+  if (qty < 1) qty = 1;
+  if (qty > 99) qty = 99;
+  qtyEl.textContent = qty;
+  offerteProds[idx].qty = qty;
+  const unit = parseFloat(priceEl.dataset.unit);
+  priceEl.textContent = '€' + (unit * qty).toFixed(2);
+  // Update total
+  const total = offerteProds.reduce((s,p) => s + parsePrice(p.price) * (p.qty||1), 0);
+  document.getElementById('total-price').textContent = '€' + total.toFixed(0);
+  document.getElementById('total-pill').textContent = '€' + total.toFixed(0);
+}
+
+function removeProduct(btn) {
+  const card = btn.closest('.product-card');
+  const idx = parseInt(card.dataset.idx);
+  offerteProds.splice(idx, 1);
+  card.style.animation = 'slideOut .2s ease forwards';
+  setTimeout(() => {
+    card.remove();
+    // Re-index remaining cards
+    document.querySelectorAll('.product-card').forEach((c, i) => c.dataset.idx = i);
+    // Update total
+    const total = offerteProds.reduce((s,p) => s + parsePrice(p.price) * (p.qty||1), 0);
+    document.getElementById('total-price').textContent = '€' + total.toFixed(0);
+    document.getElementById('total-pill').textContent = '€' + total.toFixed(0);
+    if (offerteProds.length === 0) {
+      document.getElementById('products').style.display = 'none';
+      document.getElementById('empty').style.display = 'flex';
+      document.getElementById('totaal-bar').style.display = 'none';
+      document.getElementById('seo-block').style.display = 'none';
+      document.getElementById('total-pill').style.display = 'none';
+    }
+  }, 200);
+}
 
 async function sendMessage() {
   const text = inputEl.value.trim();
