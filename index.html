@@ -690,19 +690,42 @@ async function sendMessage() {
       const cand = rawCand.trim();
       try {
         let p = JSON.parse(cand);
-        // Normalize various key names to products array
-        if (p && p.producten) p.products = p.producten;
-        if (p && p.items) p.products = p.items;
-        if (p && p.aanbevelingen) p.products = p.aanbevelingen;
-        // If no products key but has setup key with array, find the array
-        if (p && !p.products) {
-          const keys = Object.keys(p);
+        // Normalize and flatten ANY JSON structure into products array
+        function normalizeProducts(obj) {
+          if (!obj) return null;
+          // Direct array keys
+          var directKeys = ['products','producten','items','aanbevelingen','offerte','setup','lijst'];
+          for (var dk = 0; dk < directKeys.length; dk++) {
+            if (Array.isArray(obj[directKeys[dk]])) return obj[directKeys[dk]];
+          }
+          // Object with sub-objects containing 'product' or 'naam'/'name' keys (like LICHT:{product:...})
+          var collected = [];
+          var keys = Object.keys(obj);
           for (var ki = 0; ki < keys.length; ki++) {
-            if (Array.isArray(p[keys[ki]]) && p[keys[ki]].length > 0) {
-              p.products = p[keys[ki]]; break;
+            var val = obj[keys[ki]];
+            if (Array.isArray(val) && val.length > 0 && (val[0].name || val[0].naam || val[0].product || val[0].url)) {
+              return val; // Found a proper products array
+            }
+            if (val && typeof val === 'object' && !Array.isArray(val)) {
+              // Sub-object like "LICHT": {product: "...", qty: 35, url: "..."}
+              if (val.product || val.naam || val.name || val.url) {
+                var item = {
+                  name: val.product || val.naam || val.name || keys[ki],
+                  price: val.prijs_unit || val.prijs || val.price || '',
+                  category: keys[ki],
+                  reason: val.reden || val.reason || val.doel || '',
+                  url: val.url || '',
+                  img: val.img || val.image || val.afbeelding || '',
+                  qty: val.qty || val.aantal || 1
+                };
+                collected.push(item);
+              }
             }
           }
+          return collected.length > 0 ? collected : null;
         }
+        var normalizedProducts = normalizeProducts(p);
+        if (normalizedProducts) p.products = normalizedProducts;
         if (p && p.products) {
           p.products = p.products.map(function(item) {
             return {
@@ -724,17 +747,8 @@ async function sendMessage() {
         try {
           const fixed = rawCand.trim().replace(/,(\s*[}\]])/g,'$1');
           let p = JSON.parse(fixed);
-          if (p && p.producten) p.products = p.producten;
-          if (p && p.items) p.products = p.items;
-          if (p && p.aanbevelingen) p.products = p.aanbevelingen;
-          if (p && !p.products) {
-            const keys2 = Object.keys(p);
-            for (var kj = 0; kj < keys2.length; kj++) {
-              if (Array.isArray(p[keys2[kj]]) && p[keys2[kj]].length > 0) {
-                p.products = p[keys2[kj]]; break;
-              }
-            }
-          }
+          var normalizedProducts2 = normalizeProducts(p);
+          if (normalizedProducts2) p.products = normalizedProducts2;
           if (p && p.products) {
             p.products = p.products.map(function(item) {
               return {
