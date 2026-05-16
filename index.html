@@ -162,9 +162,9 @@ function searchProducts(query, n = 20) {
 
 // Build a mini catalog string from search results to inject into system prompt
 function buildContextCatalog(query) {
-  const results = searchProducts(query, 25);
+  const results = searchProducts(query, 12);
   if (!results.length) return '';
-  const lines = results.map(p => `- ${p.n} | ${p.p} | ${p.d} | URL: ${p.u} | IMG: ${p.i}`);
+  const lines = results.map(p => `- ${p.n} | ${p.p} | URL: ${p.u} | IMG: ${p.i}`);
   return '\n\nRELEVANTE PRODUCTEN VOOR DEZE VRAAG (uit volledige catalog van 845 producten):\n' + lines.join('\n');
 }
 const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdeal.nl.
@@ -479,7 +479,7 @@ function showTyping() {
         if (el) { el.textContent = THINKING_MSGS[i]; el.style.opacity = '1'; }
       }, 300);
     }
-  }, 2500);
+  }, 10000);
 }
 function removeTyping() {
   if (thinkingInterval) { clearInterval(thinkingInterval); thinkingInterval = null; }
