@@ -234,7 +234,10 @@ LENGTE chat: Max 100 woorden. Bondig en to-the-point.
 KERNFUNCTIE: Bij ELKE vraag over een setup, probleem of productvraag geef je DIRECT een JSON-blok terug met productaanbevelingen. Geen uitzonderingen.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
-- LED: Platinum QB 180W en 240W meest verkocht, Sunpro Hitter 720W ECO top omzet
+- LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
+- LED met LOSSE driver (driver apart gemonteerd): Spektra Master 720W €264.71 (incl. ballast), Fortis BYD LED 720W €167.23
+- Bij vraag "losse driver" of "driver los bovenop": → Spektra Master 720W of BYD 720W
+- Bij vraag "geïntegreerde driver": → Sunpro Hitter 720W of Platinum King ECO 720W
 - HPS: Horti Sun PRO 600W meest verkocht lamp, Platinum Electronic Ballast 600W (NOOIT Lumatek)
 - Potten: Stoffen pot 11L (#1 bestseller, 1713x verkocht), 26L (#2)
 - Meting: Platinum pH meter (#1 verkocht, 270x)
@@ -288,6 +291,9 @@ ALTIJD:
 - Gebruik spaarzaam emoji's — 1 of 2 per bericht max, nooit overdrijven
 
 REGELS:
+- TENT ALTIJD EERSTE in de offerte — nooit weglaten, ook niet bij grote setups
+- Bij grote ruimte (>4m²): bereken ALTIJD aantal lampen via grid, nooit minder dan logisch
+- Bij "losse driver" vraag: Spektra Master 720W of BYD 720W aanbevelen
 - Bij HPS: altijd complete kit aanbevelen (ballast + reflector + lamp) — nooit alleen de lamp
 - Bij HPS: altijd één maat zwaardere ventilatie + waarschuwing warmte
 - Bij beginner + hydro: adviseer te heroverwegen, stel aarde voor
@@ -355,8 +361,28 @@ Je mag UITSLUITEND producten aanbevelen die voorkomen in de "BESCHIKBARE PRODUCT
 Die sectie wordt per vraag dynamisch ingeladen vanuit de volledige catalog van 840 producten.
 NOOIT een URL, prijs of productnaam verzinnen. Als een product niet in de lijst staat, noem je het niet.
 URL formaat is ALTIJD exact zoals opgegeven — NOOIT /product/ toevoegen of de slug aanpassen.
-VERKOOP FILOSOFIE — ALTIJD meer verkopen dan minder:
-Je doel is een COMPLETE setup samenstellen. Liever 2 producten te veel dan 1 te weinig.
+VERKOOP FILOSOFIE — ALTIJD een VOLLE offerte, laat de klant verwijderen wat hij niet nodig heeft:
+Je doel: bij ELKE setup minimaal 10-15 producten in de offerte. Nooit minder dan 10.
+Vul de offerte maximaal, dan vraag je: "Heb je sommige dingen al? Verwijder ze gewoon of zeg het me."
+Dit werkt als Google Shopping — toon alles, laat de klant filteren.
+
+Na ELKE offerte zeg je in de chat:
+"Heb je al iets van dit? Klik op ✕ om het te verwijderen, of zeg me wat je al hebt."
+
+NOOIT een minimale offerte sturen. Altijd compleet:
+- Tent (altijd eerste)
+- Alle lampen (correct aantal via grid)  
+- Volledige ventilatie (afzuiger + filter + slang)
+- Controller + timer
+- Alle accessoires (clipfan, slangklemmen, ratchets, thermo-hygrometer)
+- Volledige voedingslijn (3-4 producten)
+- Meting (pH + EC of combo)
+- GEN200 Control
+- Flower Bomb (proactief)
+- CalMag bij LED
+- Potten (correct aantal)
+= minimaal 12-15 producten per complete setup
+
 Na elke aanbeveling actief doorvragen op wat er nog mist:
 - "Heb je al een timer? Zonder timer geen automatisch lichtschema"
 - "Wil je ook een thermo-hygrometer? Dan zie je altijd of je klimaat goed is"
@@ -722,10 +748,23 @@ function renderCtx() {
 
 function getSystem(query) {
   const ctxStr = Object.keys(ctx).length ? Object.entries(ctx).map(([k,v]) => k + ': ' + v).join(' | ') : 'geen context';
-  // Search with query + context for broader results
   const searchQuery = query + ' ' + Object.values(ctx).join(' ');
   const dynamicCatalog = buildContextCatalog(searchQuery);
-  return SYSTEM.replace('{CONTEXT}', ctxStr) + dynamicCatalog;
+  
+  // Build user preference context from removals and qty changes
+  let prefContext = '';
+  if (removedItems.length > 0) {
+    prefContext += '\n\nKLANT HEEFT VERWIJDERD (heeft dit al of wil dit niet): ' + removedItems.join(', ');
+  }
+  if (changedQty.length > 0) {
+    prefContext += '\nKLANT HEEFT AANTALLEN AANGEPAST: ' + changedQty.map(c => c.name + ' → ' + c.qty + 'x').join(', ');
+  }
+  if (offerteProds.length > 0) {
+    const currentNames = offerteProds.map(p => p.name + (p.qty > 1 ? ' ('+p.qty+'x)' : '')).join(', ');
+    prefContext += '\nHUIDIGE OFFERTE BEVAT: ' + currentNames;
+  }
+  
+  return SYSTEM.replace('{CONTEXT}', ctxStr) + prefContext + dynamicCatalog;
 }
 
 function addMsg(role, text) {
@@ -946,24 +985,43 @@ function changeQty(btn, delta) {
   if (qty > 99) qty = 99;
   qtyEl.textContent = qty;
   offerteProds[idx].qty = qty;
+  
+  // Track qty changes for AI context
+  const name = offerteProds[idx].name;
+  if (name) {
+    changedQty = changedQty.filter(c => c.name !== name);
+    changedQty.push({name: name, qty: qty});
+    if (changedQty.length > 10) changedQty.shift();
+  }
+  
   const unit = parseFloat(priceEl.dataset.unit);
   priceEl.textContent = '€' + (unit * qty).toFixed(2);
-  // Update total
   const total = offerteProds.reduce((s,p) => s + parsePrice(p.price) * (p.qty||1), 0);
   document.getElementById('total-price').textContent = '€' + total.toFixed(0);
   document.getElementById('total-pill').textContent = '€' + total.toFixed(0);
 }
 
+// Track user preferences from removals and qty changes
+var removedItems = [];
+var changedQty = [];
+
 function removeProduct(btn) {
   const card = btn.closest('.product-card');
   const idx = parseInt(card.dataset.idx);
+  const removed = offerteProds[idx];
+  
+  // Track what was removed for AI context
+  if (removed && removed.name) {
+    removedItems.push(removed.name);
+    // Limit memory to last 10 removals
+    if (removedItems.length > 10) removedItems.shift();
+  }
+  
   offerteProds.splice(idx, 1);
   card.style.animation = 'slideOut .2s ease forwards';
   setTimeout(() => {
     card.remove();
-    // Re-index remaining cards
     document.querySelectorAll('.product-card').forEach((c, i) => c.dataset.idx = i);
-    // Update total
     const total = offerteProds.reduce((s,p) => s + parsePrice(p.price) * (p.qty||1), 0);
     document.getElementById('total-price').textContent = '€' + total.toFixed(0);
     document.getElementById('total-pill').textContent = '€' + total.toFixed(0);
