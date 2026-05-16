@@ -173,7 +173,7 @@ function searchProducts(query, n = 20) {
 
 // Build a mini catalog string from search results to inject into system prompt
 function buildContextCatalog(query) {
-  const results = searchProducts(query, 20);
+  const results = searchProducts(query, 15);
   if (!results.length) return '';
   const lines = results.map(p => '- ' + p.n + ' | ' + p.p + ' | ID: ' + (p.id||'') + ' | URL: ' + p.u + ' | IMG: ' + p.i);
   return '\n\nBESCHIKBARE PRODUCTEN (gebruik ALLEEN deze URLs en prijzen — niet verzinnen):\n' + lines.join('\n') + '\n\nGEBRUIK UITSLUITEND de URLs en IMGs hierboven. Nooit aanpassen.';
@@ -850,14 +850,22 @@ async function sendMessage() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
+        max_tokens: 2000,
         system: getSystem(text),
-        messages: history
+        messages: history.slice(-8)
       })
     });
     const data = await res.json();
     removeTyping();
-    const raw = data.content?.find(b=>b.type==='text')?.text || (data.error ? `API fout: ${data.error.message}` : 'Er ging iets mis.');
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    if (!raw && data.error) {
+      removeTyping();
+      const isRate = data.error.message && data.error.message.includes('rate limit');
+      addMsg('assistant', isRate ? '🌱 Even wachten — ik ben momenteel heel populair! Probeer het over een paar seconden opnieuw.' : '⚠️ Er ging iets mis. Probeer opnieuw.');
+      sendBtn.disabled = false;
+      inputEl.focus();
+      return;
+    }
     
     // Parse JSON from response
     let jsonData = null;
@@ -951,14 +959,17 @@ async function sendMessage() {
     
     extractCtx(chatText);
     addMsg('assistant', chatText);
-    history.push({role:'assistant', content:raw});
+    // Only add to history if not an API error
+    if (!raw.startsWith('API fout:') && !raw.includes('rate limit') && !raw.includes('overload')) {
+      history.push({role:'assistant', content:raw});
+    }
     
     if (jsonData && jsonData.products) {
       mergeProducts(jsonData.products);
     }
   } catch(e) {
     removeTyping();
-    addMsg('assistant', '⚠️ Verbindingsfout. Probeer opnieuw.');
+    addMsg('assistant', '⚠️ Even te druk! Probeer het nog een keer 🌱');
   }
   sendBtn.disabled = false;
   inputEl.focus();
