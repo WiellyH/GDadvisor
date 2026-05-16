@@ -79,10 +79,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
 .thinking-msg{transition:opacity .3s ease;font-style:italic;color:var(--muted) !important;background:var(--white) !important;border:1px dashed var(--border) !important}
-.choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.choice-btn{background:var(--white);border:1.5px solid var(--green);color:var(--green);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-.choice-btn:hover:not(:disabled){background:var(--green-light)}
-.choice-btn:disabled{cursor:not-allowed}
+.choices{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.choice-btn{background:var(--white);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;text-align:left;width:100%}
+.choice-btn:hover:not(:disabled){border-color:var(--green);color:var(--green);background:var(--green-light)}
+.choice-btn:disabled{cursor:not-allowed;opacity:.6}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 #chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 14px 4px;border-top:1px solid var(--border);background:var(--white)}
 .chip{font-size:11.5px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--white);color:var(--muted);font-family:inherit;transition:all .15s}
@@ -676,24 +676,57 @@ async function sendMessage() {
     const raw = data.content?.find(b=>b.type==='text')?.text || (data.error ? `API fout: ${data.error.message}` : 'Er ging iets mis.');
     
     // Parse JSON from response
-    // Parse JSON - no /s flag for max browser compat
     let jsonData = null;
     let chatText = raw;
     const tagMatch = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
     const tickMatch = raw.match(/```json([\s\S]*?)```/);
-    const bareMatch = raw.match(/\{"seo"[\s\S]*?"products"[\s\S]*?\}\s*\]/);
     const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : null;
     if (rawCand) {
       const cand = rawCand.trim();
       try {
-        const p = JSON.parse(cand);
-        if (p && p.products) { jsonData = p; chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim(); }
+        let p = JSON.parse(cand);
+        // Normalize Dutch field names to English
+        if (p && p.producten) p.products = p.producten;
+        if (p && p.products) {
+          p.products = p.products.map(function(item) {
+            return {
+              name: item.name || item.naam || item.titel || '',
+              price: item.price || item.prijs || '',
+              category: item.category || item.categorie || item.cat || '',
+              reason: item.reason || item.reden || item.doel || item.omschrijving || '',
+              url: item.url || item.link || '',
+              img: item.img || item.afbeelding || item.image || '',
+              id: item.id || 0,
+              qty: item.qty || item.aantal || 1,
+              emoji: item.emoji || ''
+            };
+          });
+          jsonData = p;
+          chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
+        }
       } catch(e) {
         try {
-          const fixed = cand.replace(/,(\s*[}\]])/g,'$1');
-          const p = JSON.parse(fixed);
-          if (p && p.products) { jsonData = p; chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim(); }
-        } catch(e2) { console.error('JSON parse failed:', e2.message, cand.slice(0,200)); }
+          const fixed = rawCand.trim().replace(/,(\s*[}\]])/g,'$1');
+          let p = JSON.parse(fixed);
+          if (p && p.producten) p.products = p.producten;
+          if (p && p.products) {
+            p.products = p.products.map(function(item) {
+              return {
+                name: item.name || item.naam || item.titel || '',
+                price: item.price || item.prijs || '',
+                category: item.category || item.categorie || item.cat || '',
+                reason: item.reason || item.reden || item.doel || item.omschrijving || '',
+                url: item.url || item.link || '',
+                img: item.img || item.afbeelding || item.image || '',
+                id: item.id || 0,
+                qty: item.qty || item.aantal || 1,
+                emoji: item.emoji || ''
+              };
+            });
+            jsonData = p;
+            chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
+          }
+        } catch(e2) { console.error('JSON parse failed:', e2.message); }
       }
     }
     
