@@ -1027,16 +1027,19 @@ async function sendMessage() {
         if (p && p.products) {
           p.products = p.products.map(function(item) {
             return {
-              name: item.name || item.naam || item.titel || '',
-              price: item.price || item.prijs || '',
+              name: item.name || item.naam || item.titel || item.product || '',
+              price: item.price || item.prijs || item.prijs_unit || '',
               category: item.category || item.categorie || item.cat || '',
-              reason: item.reason || item.reden || item.doel || item.omschrijving || '',
+              reason: item.reason || item.reden || item.doel || item.omschrijving || item.note || item.recommendation || item.calculation || '',
               url: item.url || item.link || '',
               img: item.img || item.afbeelding || item.image || '',
               id: item.id || 0,
               qty: item.qty || item.aantal || 1,
               emoji: item.emoji || ''
             };
+          }).filter(function(item) {
+            // Only keep products with a valid URL - skip "recommendation" only items
+            return item.url && item.url.includes('growdeal.nl') && item.name;
           });
           jsonData = p;
           chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
@@ -1050,16 +1053,18 @@ async function sendMessage() {
           if (p && p.products) {
             p.products = p.products.map(function(item) {
               return {
-                name: item.name || item.naam || item.titel || '',
-                price: item.price || item.prijs || '',
+                name: item.name || item.naam || item.titel || item.product || '',
+                price: item.price || item.prijs || item.prijs_unit || '',
                 category: item.category || item.categorie || item.cat || '',
-                reason: item.reason || item.reden || item.doel || item.omschrijving || '',
+                reason: item.reason || item.reden || item.doel || item.omschrijving || item.note || item.recommendation || item.calculation || '',
                 url: item.url || item.link || '',
                 img: item.img || item.afbeelding || item.image || '',
                 id: item.id || 0,
                 qty: item.qty || item.aantal || 1,
                 emoji: item.emoji || ''
               };
+            }).filter(function(item) {
+              return item.url && item.url.includes('growdeal.nl') && item.name;
             });
             jsonData = p;
             chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
