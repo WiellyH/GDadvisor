@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrowDealz Setup Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#1e6b3c;--green-light:#e8f5ee;--green-dark:#164d2b;--text:#1a1a18;--muted:#6b6b68;--border:#e0ddd6;--bg:#f7f6f2;--white:#fff;--radius:12px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.logo{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px}
+.brand{font-size:15px;font-weight:600}.brand span{color:var(--green)}
+.tagline{font-size:12px;color:var(--muted)}
+.status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:#2ecc71}
+#main{display:flex;flex:1;overflow:hidden}
+#left{width:55%;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+#left-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#left-header .title{font-size:14px;font-weight:600}
+#total-pill{font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:4px 12px;border-radius:20px;display:none}
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;padding:40px;text-align:center}
+#empty .icon{font-size:40px;opacity:.3;margin-bottom:12px}
+#empty p{font-size:14px;line-height:1.6;max-width:280px}
+#products{flex:1;overflow-y:auto;padding:16px;display:none;flex-direction:column;gap:10px}
+.product-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:12px;padding:12px;position:relative;overflow:hidden;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.product-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:3px 0 0 3px}
+.product-img{width:72px;height:72px;object-fit:contain;border-radius:8px;background:var(--bg);flex-shrink:0;border:1px solid var(--border)}
+.product-emoji{width:72px;height:72px;background:var(--green-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.product-info{flex:1;min-width:0}
+.product-cat{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.product-name{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:4px}
+.product-reason{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.product-footer{display:flex;align-items:center;gap:8px}
+.product-price{font-size:16px;font-weight:700}
+.product-stock{font-size:11px;color:#27ae60}
+.btn-cart{margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s}
+.btn-cart:hover{opacity:.85}
+#seo-block{margin:0 16px 0;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);display:none;flex-shrink:0}
+.seo-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+#seo-title{font-size:16px;font-weight:700;margin-bottom:4px}
+#seo-desc{font-size:12px;color:#666;line-height:1.6;margin-bottom:8px}
+#seo-url{font-family:monospace;font-size:11px;color:var(--green);background:var(--green-light);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+#seo-keywords{display:flex;flex-wrap:wrap;gap:4px}
+.kw-tag{font-size:10px;padding:2px 7px;background:var(--bg);border:1px solid var(--border);border-radius:20px;color:var(--muted)}
+#totaal-bar{border-top:1px solid var(--border);padding:12px 16px;background:var(--white);display:none;align-items:center;gap:12px;flex-shrink:0}
+.total-label{font-size:12px;color:var(--muted)}
+.total-amount{font-size:20px;font-weight:700;color:var(--green)}
+.btn-all{margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-all:hover{opacity:.85}
+#right{width:45%;display:flex;flex-direction:column;background:var(--white)}
+#chat-header{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+#chat-header .title{font-size:14px;font-weight:600}
+#chat-header .sub{font-size:12px;color:var(--muted);margin-top:1px}
+#ctx-bar{padding:0 18px;display:flex;flex-wrap:wrap;gap:5px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s;border-bottom:1px solid transparent}
+#ctx-bar.active{max-height:50px;padding:8px 18px;border-bottom-color:var(--border)}
+.ctx-tag{font-size:11px;font-weight:500;padding:3px 9px;background:var(--green-light);color:var(--green-dark);border-radius:20px}
+#messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:8px;max-width:88%;animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.assistant{align-self:flex-start}
+.avatar{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.msg.user .avatar{background:var(--green);color:#fff}
+.msg.assistant .avatar{background:var(--green-light);color:var(--green-dark)}
+.bubble{font-size:13.5px;line-height:1.6;padding:10px 14px;border-radius:14px;white-space:pre-wrap}
+.msg.user .bubble{background:var(--green);color:#fff;border-bottom-right-radius:4px}
+.msg.assistant .bubble{background:var(--bg);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border)}
+.typing span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+#chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 14px 4px;border-top:1px solid var(--border);background:var(--white)}
+.chip{font-size:11.5px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--white);color:var(--muted);font-family:inherit;transition:all .15s}
+.chip:hover{border-color:var(--green);color:var(--green);background:var(--green-light)}
+#input-area{border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;background:var(--white);flex-shrink:0}
+#user-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13.5px;font-family:inherit;background:var(--white);color:var(--text);resize:none;outline:none;min-height:40px;max-height:100px;line-height:1.5}
+#user-input:focus{border-color:var(--green)}
+#send-btn{width:40px;height:40px;background:var(--green);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
+#send-btn:hover{opacity:.85}
+#send-btn:disabled{opacity:.35;cursor:not-allowed}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="logo">G</div>
+  <div class="brand">Grow<span>Dealz</span></div>
+  <div class="tagline">Setup Advisor</div>
+  <div class="status"><div class="dot"></div><span>growdeal.nl</span></div>
+</div>
+<div id="main">
+  <div id="left">
+    <div id="left-header">
+      <div class="title">Jouw setup offerte</div>
+      <div id="total-pill"></div>
+    </div>
+    <div id="seo-block">
+      <div class="seo-label">SEO Pagina</div>
+      <div id="seo-title"></div>
+      <div id="seo-desc"></div>
+      <div id="seo-url"></div>
+      <div id="seo-keywords"></div>
+    </div>
+    <div id="empty">
+      <div class="icon">🌱</div>
+      <p>Stel een vraag in de chat. De advisor selecteert direct de beste producten voor jouw situatie.</p>
+    </div>
+    <div id="products"></div>
+    <div id="totaal-bar">
+      <div><div class="total-label">Totaal incl. BTW</div><div class="total-amount" id="total-price">€0</div></div>
+      <button class="btn-all" onclick="openAll()">Alles in winkelmandje →</button>
+    </div>
+  </div>
+  <div id="right">
+    <div id="chat-header">
+      <div class="title">GrowDealz Setup Advisor</div>
+      <div class="sub">Beschrijf je situatie — ik stel je setup samen</div>
+    </div>
+    <div id="ctx-bar"></div>
+    <div id="messages"></div>
+    <div id="chips">
+      <button class="chip" onclick="sendChip(this)">80×80 tent, HPS, €500 budget</button>
+      <button class="chip" onclick="sendChip(this)">Mijn planten worden geel</button>
+      <button class="chip" onclick="sendChip(this)">Beginner, 2 planten, aarde</button>
+      <button class="chip" onclick="sendChip(this)">LED vs HPS vergelijken</button>
+    </div>
+    <div id="input-area">
+      <textarea id="user-input" placeholder="Beschrijf je kweeksituatie of stel een vraag..." rows="1"></textarea>
+      <button id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+</div>
+<script>
+const WORKER = 'https://workers-playground-raspy-tooth-3aae.wielly.workers.dev';
+const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdealz.de.
+
+TOON: Vriendelijk, deskundig, praktisch. Niet te formeel. Geen harde verkooptaal.
+TAAL: Altijd in de taal van de gebruiker. Standaard Nederlands.
+LENGTE chat: Max 100 woorden. Bondig en to-the-point.
+
+KERNFUNCTIE: Bij ELKE vraag over een setup, probleem of productvraag geef je DIRECT een JSON-blok terug met productaanbevelingen. Geen uitzonderingen.
+
+PRODUCTKENNIS:
+Tenten (Dutch Masters ECO): 40×40 €49 / 60×60 €59 / 80×80 €79 / 100×100 €99 / 120×120 €129
+LED verlichting: Greenception GCx-2 80W €89 (40×40) / Hortimol FSG 100W €119 (60×60) / Hortimol 180W FSG+UV+IR €169 (80×80 eco) / Platinum QB 200W €229 (80×80 pro) / Platinum QB 240W €259 (100×100 eco) / Hortimol 240W PRO €329 (100×100 pro) / Platinum QB 320W €349 (120×120 eco) / Hortimol 360W PRO €449 (120×120 pro)
+HPS (Lumatek): 250W €129 (klein) / 400W €179 (80×80) / 600W €219 (100×100, meest populair) / 1000W DE €349 (120×120+)
+CMH (Lumatek): 315W €189 / 630W €299
+Ventilatie (altijd incl. koolstoffilter + slang): 100mm 130m³/h €69 / 100mm 200m³/h €99 / 125mm 300m³/h €129 / 150mm 500m³/h €189
+Voeding/medium: Plagron Royalty Mix 50L €22 / Canna Coco Professional 50L €28 / Plagron Hydro 45L €19
+Voedingsschema beginners: BioBizz Try-Pack Indoor €18 / Plagron Starter Pack €22 / Canna Starter Kit €29
+Gebreksziekten voeding: Plagron Power Roots (wortel) €12 / Canna Cannazym (wortels, coco) €14 / BAC Organic Bloom Stimulator €16 / Hesi Boost €14 / Advanced Nutrients Big Bud €18
+pH correctie: BioBizz Bio-Down 500ml €8 / BioBizz Bio-Up 250ml €5 / BlueLab pH Pen €49
+EC/meting: Bluelab Truncheon EC €39 / Aquamaster Combo P110 €79
+Potten (fabric): 4×11L €12 / 6×11L €16 / 10×11L €24
+Controller: DM-1500 Fan Controller + Thermostat €39
+Timers: Groei/bloei timer €8
+
+DIAGNOSE LOGICA (bij kweekproblemen):
+- Gele bladeren onderaan + paarse stelen → fosfaatgebrek → voeding + pH check
+- Gele bladeren bovenaan + verbrande punten → stikstofoverschot of lichtverbranding
+- Krul omhoog + droge randen → hittestress of te weinig water
+- Krul omlaag → overwatering
+- Witte vlekken bladeren → meeldauw → Plagron PK 13-14 of fungicide
+- Gele stippen/webben → spintmijt → neem olie of Pyrethrum
+- Slappe plant + natte bodem → wortelproblemen → Plagron Power Roots
+
+ANTWOORDFORMAAT — ALTIJD dit formaat gebruiken:
+Eerst: korte chat tekst (max 80 woorden) — GEEN markdown, geen ** bold, geen opsommingstekens
+Dan: een JSON blok tussen <<<JSON>>> en <<<ENDJSON>>> tags
+KRITISCH: geen tekst, uitleg of backticks BINNEN de <<<JSON>>> tags. Puur geldige JSON.
+
+Het JSON blok heeft deze structuur:
+<<<JSON>>>
+{
+  "seo": {
+    "title": "Setup titel in het Duits voor growdealz.de",
+    "desc": "SEO beschrijving 80 woorden Duits",
+    "url": "growdealz.de/setup/[ruimte]-[licht]-[medium]-[ervaring]",
+    "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5", "keyword6"]
+  },
+  "products": [
+    {
+      "category": "Growzelt",
+      "name": "Dutch Masters ECO Growzelt 80×80×180cm",
+      "price": "€79",
+      "reason": "Perfecte maat voor jouw ruimte",
+      "url": "https://www.growdealz.de/growbox/",
+      "img": "https://www.growdeal.nl/wp-content/uploads/...",
+      "emoji": "🏕️"
+    }
+  ]
+}
+<<<ENDJSON>>>
+
+KRITISCH: Kopieer de IMG url EXACT uit de catalogus hierboven. Verzin NOOIT een img URL.
+
+COMPLETE SETUP CHECKLIST — bij elke setup altijd alle 8 componenten aanbieden:
+1. TENT — kweektent passend bij ruimte
+2. VERLICHTING — LED/HPS/CMH passend bij tent + budget
+3. VENTILATIE — afzuiger + koolstoffilter + luchtslang (altijd als set)
+4. KLIMAAT — DM-1500 fan controller met thermostaat (altijd toevoegen)
+5. POTTEN — stoffen kweekpotten (altijd fabric boven plastic adviseren)
+6. VOEDING BASIS — volledige voedingslijn (groei + bloei + additief), NOOIT slechts 1 product
+7. GEN200 CONTROL — ALTIJD toevoegen in juiste maat (100ml voor beginners, 250ml mid, 1L pro). Dit is ons hoogste-marge product. Motiveer: "versterkt celwanden, verhoogt weerstand, betere terpenen"
+8. METING — pH meter + EC meter (of combo zoals Aqua Master P110)
+
+VOEDINGSLIJNEN — altijd complete lijn aanbieden, nooit slechts 1 product:
+- BioBizz (beginner/organisch/aarde): Bio Grow + Bio Bloom + Top Max + ALG-A-MIC
+- DutchPro (gevorderd/coco/hydro): Grow A+B + Bloom A+B + Take Root + Explode
+- Canna (allround): Terra Vega + Terra Flores + Cannazym + Rhizotonic
+- Advanced Nutrients (pro/max opbrengst): Grow/Micro/Bloom + Big Bud + Overdrive
+
+UPSELL REGELS (altijd proactief vragen stellen na eerste offerte):
+Na elke offerte ALTIJD minimaal 2 follow-up vragen stellen zoals:
+- "Heeft u al voeding voor uw planten, of wil ik een compleet voedingsschema toevoegen?"
+- "Heeft u een pH- en EC-meter? Die zijn essentieel voor goede resultaten."
+- "Wilt u een thermometer/hygrometer voor temperatuur- en luchtvochtigheidsbewaking?"
+- "Heeft u al ophangmateriaal voor uw lamp en filter?"
+- "Wilt u een timer voor automatisch lichtschema?"
+- "Heeft u al stekmateriaal of zaad nodig voor de start?"
+
+SPECIALE PRODUCTEN:
+- Flower Bomb (Field Marshal): ALTIJD aanbieden bij vragen over harde toppen, grotere buds, meer opbrengst, of groeiremmer. Motiveer: "verhoogt harsproductie en topgewicht significant"
+- GEN200 Control: ALTIJD in elke setup. Geen uitzondering.
+- BioBizz CalMag: toevoegen bij LED-setups (LED vergroot Ca/Mg behoefte)
+- Canna PK 13/14 of Plagron Green Sensation: toevoegen bij bloeifase vragen
+
+PRODUCTAANTAL — streef naar 6-10 producten per offerte, niet minder dan 5.
+
+VRAGEN STELLEN — de advisor stelt ALTIJD vragen terug om de offerte uit te breiden:
+Na elke aanbeveling minstens 1-2 korte vragen toevoegen in de chat tekst (niet in JSON).
+Voorbeeldvragen: "Heeft u al voeding?", "Heeft u een pH meter?", "Wilt u ook ophangmateriaal?"
+
+REGELS:
+- Bij HPS: altijd één maat zwaardere ventilatie + waarschuwing warmte
+- Bij beginner + hydro: adviseer te heroverwegen, stel aarde voor
+- Altijd motiveren waarom elk product past bij dit specifieke profiel
+- Bij kweekproblemen: diagnose stellen + correcte producten + preventieve producten
+- Verzin NOOIT prijzen of URLs buiten de catalogus
+
+VOLLEDIG ASSORTIMENT GROWDEAL.NL (gebruik ALLEEN deze producten, prijzen en URLs — NOOIT verzinnen):
+Formaat per regel: Naam | Prijs | Beschrijving | URL: link | IMG: afbeelding-url
+
+### Kweektenten
+- Dutch Masters ECO 40x40x160cm | €34.39 | URL: https://www.growdeal.nl/product/dutch-masters-eco-kweektent-40x40x160cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55021-Kweektent-ECO-DM-40x-40x-160.jpg
+- Dutch Masters ECO 60x60x180cm | €48.77 | URL: https://www.growdeal.nl/product/dutch-masters-eco-kweektent-60x60x180cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55015-Kweektent-ECO-DM-60x-60x-180-cm.jpg
+- Dutch Masters ECO 80x80x180cm | €59.28 | URL: https://www.growdeal.nl/product/dutch-masters-eco-kweektent-80x80x180cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55023-Kweektent-ECO-DM-80x-80x-180-cm-1.jpg
+- Dutch Masters ECO 100x100x200cm | €70.55 | URL: https://www.growdeal.nl/product/dutch-masters-eco-kweektent-100x100x200cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55010-Kweektent-ECO-DM-100x-100x-200-cm-2.jpg
+- Dutch Masters ECO 120x120x200cm | €79.48 | URL: https://www.growdeal.nl/product/dutch-masters-eco-kweektent-120x120x200cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55011-Kweektent-ECO-DM-120x-120x-220-cm-1.jpg
+- Dutch Masters PRO 120x120x220cm | €163.20 | URL: https://www.growdeal.nl/product/dutch-masters-pro-kweektent-120x120x220250cm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH55001-Kweektent-PRO-DM-120x-120x-220-250-cm.jpg
+
+### LED Verlichting
+- Platinum Quantumboard LED 120W | €54.20 | URL: https://www.growdeal.nl/product/platinum-quantumboard-led-120w/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8PLA00197-Quantumboard-LED-PL-120W.jpg
+- Platinum Quantumboard LED 180W | €57.56 | URL: https://www.growdeal.nl/product/platinum-quantumboard-led-180w/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8PLA00198-Quantumboard-LED-PL-180W.jpg
+- Platinum Quantumboard LED 240W | €74.36 | URL: https://www.growdeal.nl/product/platinum-quantumboard-led-240w/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8PLA00199-Quantumboard-LED-PL-240W.jpg
+- Hortimol LED 180W Full Spectrum | €150.00 | URL: https://www.growdeal.nl/product/hortimol-led-paneel-180w-full-spectrum/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8HOR180W01.jpg
+- Platinum King 400W LED | €189.00 | URL: https://www.growdeal.nl/product/platinum-king-400w-led-kweeklamp/ | IMG: https://www.growdeal.nl/wp-content/uploads/2026/03/Platinum-King-LED-400-W-Con-Conexion-Para-Master-Controller-removebg-preview-1.png
+- Fortis BYD LED 720W | €167.23 | URL: https://www.growdeal.nl/product/fortis-byd-led-720w/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8BYD10720-Fortis-BYD-LED-720W.jpg
+
+### HPS Verlichting
+- GE Lucalox HPS 400W | €16.96 | URL: https://www.growdeal.nl/product/ge-current-lucalox-hps-400w-230v-e40/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8BUL93142331.jpg
+- Horti Sun PRO HPS 600W | €8.19 | URL: https://www.growdeal.nl/product/horti-sun-power-pro-hps-600w-230v-e40/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8BUL40HSP.jpg
+- Platinum HPS 1000W DE | €19.01 | URL: https://www.growdeal.nl/product/platinum-hps-1000w-400v-de/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8BUL17-Platinum-lamp-D.E-1000W.jpg
+
+### Ventilatie
+- Platinum Afzuiger 100mm 130m³/h | €6.93 | URL: https://www.growdeal.nl/product/platinum-inline-afzuiger-100mm---130-mh/ | IMG: https://www.growdeal.nl/wp-content/uploads/2026/03/C8DMH11159-Inline-extractor-PL100.jpg
+- Garden HighPro Afzuiger 125mm 190m³/h | €10.15 | URL: https://www.growdeal.nl/product/garden-highpro-inline-afzuiger-125-mm-190-mh/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/extr0022-01-1.webp
+- Garden HighPro Afzuiger 150mm 305m³/h | €12.05 | URL: https://www.growdeal.nl/product/garden-highpro-inline-afzuiger-150-mm-305-mh/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/extr0022-01-3.webp
+- Can Lite Filter 150m³ 100/125mm | €22.11 | URL: https://www.growdeal.nl/product/can-lite-filter-25-cm-150-m-100125/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8CNF4830.jpg
+- Koolstoffilter 155m³ | €23.40 | URL: https://www.growdeal.nl/product/koolstoffilter-155m3/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/09/17729_rhino-6-inch-filter-150-x-300.webp
+- High Flow Koolstoffilter 300m³ | €31.03 | URL: https://www.growdeal.nl/product/high-flow-koolstoffilter-300m3-flens-100mm/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/09/High-Flow-Carbon-Filter-300m3-flange-100.webp
+- Combiconnect luchtslang 102mm 10m | €11.04 | URL: https://www.growdeal.nl/product/combiconnect---102-mm-x-10-m/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/Combiconnect-luchtslang.jpg
+- Combiconnect luchtslang 127mm 10m | €14.29 | URL: https://www.growdeal.nl/product/combiconnect---127-mm-x-10-m/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/Combiconnect-luchtslang.jpg
+
+### Klimaat
+- Dutch Masters Fan Controller DM-1500 + Thermostaat | €22.43 | URL: https://www.growdeal.nl/product/dutch-masters-fan-controller-met-thermostaat-dm-1500/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH75-Ventilatorregelaar-met-thermostaat-DM-1500.jpg
+- Inqontrol STC Twinmaster Fan Controller 14A | €81.42 | URL: https://www.growdeal.nl/product/inqontrol-stc-twinmaster-fan-controller-14a/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH160-Stc-Twin-regelaar-14A.jpg
+
+### Potten
+- Stoffen Kweekpot 11L | €1.45 | URL: https://www.growdeal.nl/product/stoffen-kweekpot-rond-zwart-11l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH44016-Stoffen-Pot-Rond-Zwart-11-L.jpg
+- Stoffen Kweekpot 26L | €1.97 | URL: https://www.growdeal.nl/product/stoffen-kweekpot-rond-zwart-26l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH44016-Stoffen-Pot-Rond-Zwart-11-L.jpg
+- Aero Kunststof Kweekpot 11L | €1.40 | URL: https://www.growdeal.nl/product/aero-kunststof-kweekpot-vierkant-11l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8TK0151-Aero-pot-Vierkant-11-L.jpg
+
+### Voeding BioBizz
+- BioBizz Bio Grow 1L | €9.50 | URL: https://www.growdeal.nl/product/biobizz-bio-grow-1-l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8BIZ940102.jpg
+- BioBizz Bio Bloom 1L | €7.32 | URL: https://www.growdeal.nl/product/biobizz-bio-bloom-1-l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8BIZ940105-1.jpg
+- BioBizz Top Max 250ml | €5.34 | URL: https://www.growdeal.nl/product/biobizz-top-max-250-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/BioBizz-Top-Max-250-ml.png
+- BioBizz Root Juice 500ml | €14.96 | URL: https://www.growdeal.nl/product/biobizz-root-juice-500-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/BioBizz-Root-Juice-500-ml.png
+- BioBizz CalMag 1L | €8.80 | URL: https://www.growdeal.nl/product/biobizz-calmag-1-l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/biobizz-calmag-organischer-calcium-und-magnesium-zusatz-1-liter.webp
+- BioBizz Try-Pack Stimulant | €16.12 | URL: https://www.growdeal.nl/product/biobizz-try-pack-stimulant/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8BIZ940512.jpg
+
+### Voeding Plagron
+- Plagron Power Roots 500ml | €17.45 | URL: https://www.growdeal.nl/product/plagron-power-roots-500ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2026/03/Power-Roots-500ml.png
+- Plagron Green Sensation 1L | €71.01 | URL: https://www.growdeal.nl/product/plagron-green-sensation-1l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2026/03/Green-Sensation-1L.png
+- Plagron PK 13-14 1L | €8.71 | URL: https://www.growdeal.nl/product/plagron-pk-13-14-1l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2026/03/PK-13-14-1L.png
+
+### Voeding Canna
+- Canna PK 13/14 250ml | €6.67 | URL: https://www.growdeal.nl/product/canna-pk-1314-250ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8CNA77456-Canna-PK-13-14-025L.jpg
+- Cannazym 500ml | €10.16 | URL: https://www.growdeal.nl/product/cannazym-500ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8CNA77106-Cannazym-05L.jpg
+- Biocanna Rhizotonic 1L | €21.64 | URL: https://www.growdeal.nl/product/biocanna-rhizotonic-1l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/04/C8CNA77128.jpg
+
+### Voeding DutchPro
+- DutchPro Grow Soil A+B 1L | €12.56 | URL: https://www.growdeal.nl/product/dutchpro-grow-soil-a-amp-b-1l-hard-water/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/08/C8DP1401-DutchPro-Grow-Soil-AB-_-1L-_-Soft-Water.jpg
+- DutchPro Bloom Soil A+B 5L | €27.12 | URL: https://www.growdeal.nl/product/dutchpro-bloom-soil-a-amp-b-5l-hard-water/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/08/DutchPro-Bloom-Soil-A-B-5L-Hard-Water_9951_38-800x800-1.jpeg
+- DutchPro Take Root 250ml | €19.21 | URL: https://www.growdeal.nl/product/dutchpro-take-root-250-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/08/C8DP2250-DutchPro-Take-Root-_-250-ml.jpg
+
+### Additieven & Specials
+- GEN200 Control 100ml | €15.55 | URL: https://www.growdeal.nl/product/gen200-control-100-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8GEN00027-Gen200-Control-100-ml.jpg
+- GEN200 Control 250ml | €30.02 | URL: https://www.growdeal.nl/product/gen200-control-250-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8GEN00027-Gen200-Control-100-ml.jpg
+- Flower Bomb 30ml | €6.26 | URL: https://www.growdeal.nl/product/flower-bomb-30ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/01/C8FLO77154-Flower-Bomb-30ml.jpg
+- Flower Bomb 250ml | €39.04 | URL: https://www.growdeal.nl/product/flower-bomb-250ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/01/C8FLO77154-Flower-Bomb-30ml.jpg
+- BioBizz Alg-A-Mic 500ml | €6.53 | URL: https://www.growdeal.nl/product/biobizz-alg-a-mic-500-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8BIZ940200.png
+
+### pH & EC Meting
+- Platinum pH meter | €10.88 | URL: https://www.growdeal.nl/product/platinum-ph-meter/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH11137-pH-meter-Platinum.jpg
+- Platinum EC meter | €10.88 | URL: https://www.growdeal.nl/product/platinum-ec-meter/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH11138-EC-meter-Platinum.jpg
+- Aqua Master Combo P110 Pro | €58.88 | URL: https://www.growdeal.nl/product/aqua-master-combo-pen-p110-pro/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8DMH11045-Aquamaster-combo-P110-pro.jpg
+- BioBizz pH- 500ml | €5.50 | URL: https://www.growdeal.nl/product/biobizz-ph--500-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/C8BIZ940523.jpg
+- BioBizz pH+ 500ml | €5.12 | URL: https://www.growdeal.nl/product/biobizz-ph-500-ml/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/02/biobizz-bio-ph-500-ml.jpg
+
+GROEI KENNIS (gebruik dit bij vragen over kweken):
+
+LEVENSCYCLUS:
+- Week 1-2: Ontkiemen/zaailing — 18u licht, pH 6.0-6.5, EC 0.8-1.0, kleine pot
+- Week 3: Verpotten — kies potmaat op basis van gewenste plantgrootte (11L voor 40-60cm plant, 26L voor 80cm+)
+- Week 3-8: Groeifase — 18/6 lichtschema, pH 6.0-6.5 (aarde) / 5.5-6.0 (coco/hydro), EC 1.2-1.8
+- Bloeiweek 1: Schakel naar 12/12 lichtschema — plant strekt tot 2x
+- Bloeiweek 2-3: Eerste bloeiharen verschijnen
+- Bloeiweek 4-6: Toppen vormen zich
+- Bloeiweek 7-8: Spoelfase — alleen water, flush voeding eruit
+- Oogst: Trichomen melkwit/amber = oogsttijd
+
+LICHT TIPS:
+- LED voordelen: minder warmte, energiezuiniger, langere levensduur, betere terpenproductie
+- HPS voordelen: krachtige dieptestraling, bewezen technologie, goedkoper instapprijs
+- Zaailingen: 7-10 cm afstand van lamp, ook spaarlampen geschikt eerste 2 weken
+- LED afstand: 30-60cm (check fabrieksspecificaties)
+- HPS afstand: 40-60cm bij 400W, 50-80cm bij 600W+
+
+WATER & VOEDING:
+- Aarde: water als bovenste laag droog is, til pot op voor gewichtgevoel
+- pH aarde: 6.0-6.5 | pH coco/hydro: 5.5-6.0
+- Bio kweken: geen pH meten nodig bij actief bodemleven + organische voeding
+- EC groeifase: 1.2-1.6 | EC bloeifase: 1.6-2.2 | EC spoelfase: <0.5
+- Mix eerst voeding, daarna pas pH aanpassen
+
+VEELVOORKOMENDE PROBLEMEN:
+- Gele bladeren onderaan + paarse stelen → fosfaatgebrek → pH controleren + fosfaatvoeding
+- Gele bladeren bovenaan / verbrande punten → stikstofoverschot of lichtverbranding → lamp hoger / voeding verminderen
+- Krul omhoog + droge randen → hittestress of te weinig water → temperatuur check, meer water
+- Krul omlaag + zwaar aanvoelende pot → overwatering → minder water, betere drainage
+- Witte poederachtige vlekken op bladeren → meeldauw → GEN200 Control / betere ventilatie
+- Gele stipjes + fijn webben onderkant bladeren → spintmijt → neem olie / Pyrethrum behandeling
+- Slappe plant + natte bodem + bruine wortels → wortelrot → Biocanna Rhizotonic / Cannazym
+- Internervenale vergeling (gele bladeren met groene nerven) → Ca/Mg gebrek → BioBizz CalMag
+- Punten verbranden bij voldoende afstand → voedingstoxiciteit → spoel + verlaag EC
+
+VENTILATIE VUISTREGEL:
+- Tent volume (m³) × 60 = benodigde m³/h afzuiger
+- 80×80×180: 0.8×0.8×1.8 = 1.15m³ × 60 = 69m³/h minimum, kies 100-150m³/h
+- Bij HPS: altijd 1 maat zwaarder vanwege warmteontwikkeling
+- Luchtvochtigheid: groeifase 50-70% | bloeifase 40-50% | laatste weken <45%
+- Temperatuur: dag 20-28°C | nacht 18-22°C | HPS tent maximaal 28°C
+
+
+BELANGRIJK: 
+- Gebruik ALTIJD de exacte URL en IMG uit de catalogus hierboven
+- Alle URLs zijn van growdeal.nl (Nederlandse site)
+- Geef ALTIJD het IMG-veld mee in je JSON zodat foto's getoond worden
+- Bij elke productvraag of setup DIRECT een JSON blok genereren
+
+WIZARD CONTEXT: {CONTEXT}`;
+
+let history = [], ctx = {}, offerteProds = [];
+const msgEl = document.getElementById('messages');
+const inputEl = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+
+const CTX_RE = [
+  {re:/\b(40[×x]40|60[×x]60|80[×x]80|100[×x]100|120[×x]120)\b/i, key:'📐 ruimte'},
+  {re:/\b(LED|HPS|CMH|LEC)\b/i, key:'💡 licht'},
+  {re:/€\s*(\d[\d.]*)/i, key:'💶 budget', fmt:m=>'€'+m[1]},
+  {re:/\b(aarde|coco|hydro)\b/i, key:'🌱 medium'},
+  {re:/\b(beginner|gevorderd|professional|onervaren)\b/i, key:'🎓 niveau'},
+];
+
+function extractCtx(text) {
+  CTX_RE.forEach(({re,key,fmt}) => {
+    const m = text.match(re);
+    if (m && !ctx[key]) { ctx[key] = fmt ? fmt(m) : m[0]; renderCtx(); }
+  });
+}
+
+function renderCtx() {
+  const bar = document.getElementById('ctx-bar');
+  bar.innerHTML = Object.entries(ctx).map(([k,v])=>`<span class="ctx-tag">${k} ${v}</span>`).join('');
+  bar.className = Object.keys(ctx).length ? 'active' : '';
+}
+
+function getSystem() {
+  const ctxStr = Object.keys(ctx).length ? Object.entries(ctx).map(([k,v])=>`${k}: ${v}`).join(' | ') : 'geen context';
+  return SYSTEM.replace('{CONTEXT}', ctxStr);
+}
+
+function addMsg(role, text) {
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="avatar">${role==='user'?'JIJ':'GD'}</div><div class="bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  msgEl.appendChild(d);
+  msgEl.scrollTop = msgEl.scrollHeight;
+}
+
+function showTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg assistant'; d.id = 'typing';
+  d.innerHTML = '<div class="avatar">GD</div><div class="bubble typing"><span></span><span></span><span></span></div>';
+  msgEl.appendChild(d); msgEl.scrollTop = msgEl.scrollHeight;
+}
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+function parsePrice(s) { return parseFloat((s||'').replace(/[^0-9.,]/g,'').replace(',','.')) || 0; }
+
+function getEmoji(cat) {
+  const c = (cat||'').toLowerCase();
+  if(c.includes('tent')||c.includes('zelt')) return '🏕️';
+  if(c.includes('led')||c.includes('hps')||c.includes('lamp')||c.includes('licht')) return '💡';
+  if(c.includes('ventil')||c.includes('filter')||c.includes('afzuig')) return '💨';
+  if(c.includes('voeding')||c.includes('ph')||c.includes('ec')) return '🧪';
+  if(c.includes('pot')||c.includes('medium')||c.includes('aarde')||c.includes('coco')) return '🌱';
+  if(c.includes('controller')||c.includes('klimaat')) return '🎛️';
+  if(c.includes('meter')||c.includes('meting')) return '📊';
+  return '📦';
+}
+
+function renderProducts(products, seo) {
+  const grid = document.getElementById('products');
+  const empty = document.getElementById('empty');
+  const totBar = document.getElementById('totaal-bar');
+  const seoBlock = document.getElementById('seo-block');
+  const pill = document.getElementById('total-pill');
+  
+  offerteProds = products;
+  grid.innerHTML = '';
+  empty.style.display = 'none';
+  grid.style.display = 'flex';
+  totBar.style.display = 'flex';
+
+  if (seo) {
+    seoBlock.style.display = 'block';
+    document.getElementById('seo-title').textContent = seo.title || '';
+    document.getElementById('seo-desc').textContent = seo.desc || '';
+    document.getElementById('seo-url').textContent = seo.url || '';
+    document.getElementById('seo-keywords').innerHTML = (seo.keywords||[]).map(k=>`<span class="kw-tag">${k}</span>`).join('');
+  }
+
+  let total = 0;
+  products.forEach(p => {
+    total += parsePrice(p.price);
+    const imgHtml = p.img 
+      ? `<img class="product-img" src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">`
+      : `<div class="product-emoji">${p.emoji||getEmoji(p.category)}</div>`;
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `${imgHtml}<div class="product-info"><div class="product-cat">${p.category||''}</div><div class="product-name">${p.name||''}</div><div class="product-reason">${p.reason||''}</div><div class="product-footer"><span class="product-price">${p.price||''}</span><span class="product-stock">✓ op voorraad</span><a href="${p.url}" target="_blank" class="btn-cart">In winkelmandje →</a></div></div>`;
+    grid.appendChild(card);
+  });
+
+  const fmt = '€' + total.toFixed(0);
+  document.getElementById('total-price').textContent = fmt;
+  pill.textContent = fmt; pill.style.display = 'inline-block';
+}
+
+function openAll() { offerteProds.forEach(p => p.url && window.open(p.url,'_blank')); }
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = ''; inputEl.style.height = 'auto';
+  document.getElementById('chips').style.display = 'none';
+  sendBtn.disabled = true;
+  extractCtx(text);
+  addMsg('user', text);
+  history.push({role:'user', content:text});
+  showTyping();
+
+  try {
+    const res = await fetch(WORKER, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 2000,
+        system: getSystem(),
+        messages: history
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    const raw = data.content?.find(b=>b.type==='text')?.text || (data.error ? `API fout: ${data.error.message}` : 'Er ging iets mis.');
+    
+    // Parse JSON from response
+    const m1 = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
+    const m2 = raw.match(/```json\s*([\s\S]*?)```/s);
+    const m3 = raw.match(/(\{[\s\S]*?"products"[\s\S]*\})/s);
+    const cand = (m1&&m1[1]||m2&&m2[1]||m3&&m3[1]||'').trim();
+    let jsonData = null;
+    if (cand) { try { const p = JSON.parse(cand); if(p&&p.products) jsonData = p; } catch(e) { try { const p = JSON.parse(cand.replace(/,\s*}/g,'}').replace(/,\s*]/g,']')); if(p&&p.products) jsonData=p; } catch(e2) {} } }
+    
+    const chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/gs,'').trim();
+    
+    extractCtx(chatText);
+    addMsg('assistant', chatText);
+    history.push({role:'assistant', content:raw});
+    
+    if (jsonData && jsonData.products) {
+      renderProducts(jsonData.products, jsonData.seo);
+    }
+  } catch(e) {
+    removeTyping();
+    addMsg('assistant', '⚠️ Verbindingsfout. Probeer opnieuw.');
+  }
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+function sendChip(el) { inputEl.value = el.textContent; sendMessage(); }
+
+inputEl.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+inputEl.addEventListener('input', () => { inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,100)+'px'; });
+
+addMsg('assistant', 'Hallo! Beschrijf je kweeksituatie — ruimtegrootte, verlichtingsvoorkeur, budget of een kweekprobleem — en ik stel direct een complete setup samen met producten van growdeal.nl.');
+</script>
+</body>
+</html>
