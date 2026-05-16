@@ -633,7 +633,9 @@ function renderProducts(products, seo) {
   let total = 0;
   products.forEach(p => {
     const qty = p.qty || 1;
-    total += parsePrice(p.price) * qty;
+    const priceNum = parsePrice(p.price);
+    const totalLinePrice = priceNum * qty;
+    total += totalLinePrice;
     const imgHtml = p.img 
       ? `<img class="product-img" src="${p.img}" alt="${p.name}" onerror="this.outerHTML='<div class=\'product-emoji\'>${p.emoji||getEmoji(p.category)}</div>'">`
       : `<div class="product-emoji">${p.emoji||getEmoji(p.category)}</div>`;
@@ -641,9 +643,6 @@ function renderProducts(products, seo) {
     card.className = 'product-card';
     const idx = grid.children.length;
     card.dataset.idx = idx;
-    const qty = p.qty || 1;
-    const priceNum = parsePrice(p.price);
-    const totalLinePrice = priceNum * qty;
     card.innerHTML = `${imgHtml}<div class="product-info"><div class="product-cat">${p.category||''}</div><div class="product-name">${p.name||''}</div><div class="product-reason">${p.reason||''}</div><div class="product-footer"><div class="qty-wrap"><button class="qty-btn" onclick="changeQty(this,-1)">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="changeQty(this,1)">+</button></div><span class="product-price line-price" data-unit="${priceNum}">€${totalLinePrice.toFixed(2)}</span><span class="product-stock">✓ op voorraad</span><a href="${p.url}" target="_blank" class="btn-cart">Winkelmandje →</a><button class="btn-del" onclick="removeProduct(this)">✕</button></div></div>`;
     grid.appendChild(card);
   });
