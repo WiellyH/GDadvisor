@@ -637,7 +637,7 @@ function renderProducts(products, seo) {
     var lineTotal = priceNum * qty;
     total += lineTotal;
     var imgHtml = p.img
-      ? '<img class="product-img" src="' + p.img + '" alt="' + (p.name||'') + '" onerror="this.style.display='none'">'
+      ? '<img class="product-img" src="' + p.img + '" alt="product" onerror="this.style.display=\'none\'">'
       : '<div class="product-emoji">' + (p.emoji || getEmoji(p.category)) + '</div>';
     var card = document.createElement('div');
     card.className = 'product-card';
