@@ -71,6 +71,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .typing span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite}
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
+.thinking-msg{transition:opacity .3s ease;font-style:italic;color:var(--muted) !important;background:var(--white) !important;border:1px dashed var(--border) !important}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 #chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 14px 4px;border-top:1px solid var(--border);background:var(--white)}
 .chip{font-size:11.5px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--white);color:var(--muted);font-family:inherit;transition:all .15s}
@@ -414,13 +415,44 @@ function addMsg(role, text) {
   msgEl.scrollTop = msgEl.scrollHeight;
 }
 
+const THINKING_MSGS = [
+  '🧙 Even de mastergrower raadplegen...',
+  '🌿 Komt eraan — goede toppen hebben ook tijd nodig...',
+  '💬 Ik overleg ff met de mannen in de tent...',
+  '🏆 Goed advies kan ff duren. Net als een dikke cola...',
+  '🌱 Week 1 van het antwoord is ingezet...',
+  '🔦 Licht aanzetten op 18/6, antwoord bijna klaar...',
+  '🧪 EC checken, pH checken, advies checken...',
+  '🪴 Mijn moederplant fluistert me iets in...',
+  '💡 600W aan ideeën aan het opwarmen...',
+  '😤 Niet haast — slechte setups komen van slechte haast...',
+];
+let thinkingInterval = null;
+
 function showTyping() {
   const d = document.createElement('div');
   d.className = 'msg assistant'; d.id = 'typing';
-  d.innerHTML = '<div class="avatar">GD</div><div class="bubble typing"><span></span><span></span><span></span></div>';
-  msgEl.appendChild(d); msgEl.scrollTop = msgEl.scrollHeight;
+  const msg = THINKING_MSGS[Math.floor(Math.random() * THINKING_MSGS.length)];
+  d.innerHTML = `<div class="avatar">GD</div><div class="bubble thinking-msg">${msg}</div>`;
+  msgEl.appendChild(d);
+  msgEl.scrollTop = msgEl.scrollHeight;
+  // Rotate message every 2.5s
+  let i = 0;
+  thinkingInterval = setInterval(() => {
+    const el = document.querySelector('#typing .thinking-msg');
+    if (el) {
+      i = (i + 1) % THINKING_MSGS.length;
+      el.style.opacity = '0';
+      setTimeout(() => {
+        if (el) { el.textContent = THINKING_MSGS[i]; el.style.opacity = '1'; }
+      }, 300);
+    }
+  }, 2500);
 }
-function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+function removeTyping() {
+  if (thinkingInterval) { clearInterval(thinkingInterval); thinkingInterval = null; }
+  const t = document.getElementById('typing'); if(t) t.remove();
+}
 
 function parsePrice(s) { return parseFloat((s||'').replace(/[^0-9.,]/g,'').replace(',','.')) || 0; }
 
@@ -492,7 +524,7 @@ async function sendMessage() {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 3000,
         system: getSystem(),
         messages: history
