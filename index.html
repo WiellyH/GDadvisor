@@ -98,9 +98,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 </head>
 <body>
 <div id="topbar">
-  <div class="logo">G</div>
-  <div class="brand">Grow<span>Dealz</span></div>
-  <div class="tagline">Setup Advisor</div>
+  <a href="https://www.growdeal.nl" target="_blank" style="display:flex;align-items:center;text-decoration:none">
+    <img src="https://www.growdeal.nl/wp-content/uploads/2024/10/logo-growdeal-transparant.png" 
+         alt="GrowDeal.nl" 
+         style="height:32px;width:auto;object-fit:contain"
+         onerror="this.outerHTML='<div class=\'logo\'>G</div>'">
+  </a>
+  <div class="tagline" style="margin-left:8px;font-size:13px;color:#666">Setup Advisor</div>
   <div class="status"><div class="dot"></div><span>growdeal.nl</span></div>
 </div>
 <div id="main">
@@ -146,6 +150,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
 </div>
 <script>
+// Hide our topbar when embedded in B12 or iframe
+if (window.self !== window.top) {
+  document.getElementById('topbar').style.display = 'none';
+}
 const WORKER = 'https://workers-playground-raspy-tooth-3aae.wielly.workers.dev';
 
 // Load full product catalog from products.json
@@ -160,7 +168,6 @@ function searchProducts(query, n = 20) {
   if (!CATALOG.length) return [];
   const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
   return CATALOG
-    .filter(p => p.s) // in stock only
     .map(p => {
       const text = p.k.toLowerCase();
       const score = terms.reduce((s, t) => s + (text.includes(t) ? 1 : 0), 0);
@@ -229,11 +236,25 @@ KERNFUNCTIE: Bij ELKE vraag over een setup, probleem of productvraag geef je DIR
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED: Platinum QB 180W en 240W meest verkocht, Sunpro Hitter 720W ECO top omzet
 - HPS: Horti Sun PRO 600W meest verkocht lamp, Platinum Electronic Ballast 600W (NOOIT Lumatek)
-- Potten: Stoffen pot 11L (#1), 26L (#2)
-- Meting: Platinum pH meter (#1 verkocht)
+- Potten: Stoffen pot 11L (#1 bestseller, 1713x verkocht), 26L (#2)
+- Meting: Platinum pH meter (#1 verkocht, 270x)
 - Additieven: GEN200 Control 1L en Flower Bomb top omzet
 - Ventilatie: Can Lite Filter 150m³ meest verkocht filter
 - Accessoires: Clipfan 15cm, RVS Slangklemmen, Rope Ratchet PRO altijd meenemen
+
+CORRECTE PRODUCTNAMEN — gebruik EXACT deze namen, nooit iets verzinnen:
+DutchPro voeding heet: "DutchPro Grow Hydro/Coco A & B" en "DutchPro Bloom Hydro/Coco A & B" (voor coco)
+DutchPro voeding heet: "DutchPro Grow Soil A & B" en "DutchPro Bloom Soil A & B" (voor aarde)
+DutchPro heeft GEEN product dat "Base" heet — dit bestaat niet
+BioBizz voeding heet: "BioBizz Bio Grow", "BioBizz Bio Bloom", "BioBizz Top Max"
+Canna voeding heet: "Canna Terra Vega", "Canna Terra Flores", "Cannazym", "Canna Rhizotonic"
+Platinum ballast heet: "Platinum Electronic Ballast 600W" — niet "Lumatek" of iets anders
+De stoffen potten heten: "Stoffen Kweekpot Rond Zwart 11L", "Stoffen Kweekpot Rond Zwart 26L"
+Clipfan heet gewoon: "Clipfan 15cm"
+Rope Ratchet heet: "Ophangsysteem Rope Ratchet PRO (68kg)"
+Slangklemmen heten: "RVS Slangklem - Ø 60-160 mm"
+
+NOOIT productnamen verzinnen of afkorten — gebruik altijd de exacte naam uit de BESCHIKBARE PRODUCTEN lijst.
 KARAKTER & PERSOONLIJKHEID:
 Je bent Grow — een hippie grower met jaren ervaring die andere growers helpt hun perfecte setup samen te stellen. Je bent geen verkoopbot. Je bent een vriend die toevallig alle producten kent.
 
@@ -448,14 +469,25 @@ Alleen losse lamp aanbevelen als klant expliciet vraagt om vervanglamp.
 
 LICHT BEREKENING — praktisch en realistisch:
 
-STANDAARD TENT MATEN en bijbehorende lampen:
-- 60×60cm tent → 1× 180W of 240W LED
-- 80×80cm tent → 1× 240W of 360W LED
-- 100×100cm tent → 1× 360W of 480W LED  
-- 120×120cm tent → 1× 480W of 600W LED
-- 150×150cm tent → 1× 720W LED of 1000W HPS (dekt 1.5×1.5m)
-- 240×120cm tent → 2× 600W LED of 720W LED
-- 240×240cm tent → 4× 600W of 720W LED (2×2 grid)
+BESCHIKBARE TENT MATEN (alleen deze op voorraad aanbevelen):
+Beschikbare maten: 40×40, 60×60, 80×80, 100×100, 120×120, 150×150, 240×120, 240×240, 300×300cm
+ECO lijn (budget) en PRO lijn (steviger) beschikbaar in de meeste maten.
+
+Standaard lampen per tent:
+- 60×60cm → 1× 180W of 240W LED
+- 80×80cm → 1× 240W of 360W LED
+- 100×100cm → 1× 360W of 480W LED
+- 120×120cm → 1× 480W of 600W LED
+- 150×150cm → 1× 720W LED (dekt 1.5×1.5m)
+- 240×120cm → 2× 600W of 720W LED
+- 240×240cm PRO → 4× 720W LED
+
+BIJ VRAAG NAAR 3×3m TENT:
+Er is geen 3×3m ECO tent op voorraad. Adviseer dan:
+→ Dutch Masters PRO 300×300cm (€523) — wel op voorraad, professioneel
+→ OF: Dutch Masters PRO 240×240cm (€425) als iets kleiner ook goed is
+Leg eerlijk uit: "De 3×3 ECO is momenteel niet beschikbaar, maar de PRO versie is er wel — die is steviger ook"
+NOOIT twee kleinere tenten combineren als workaround voor een 3×3!
 
 GROTERE KWEEKRUIMTES — bereken zo:
 Basis formule: m² ÷ 1.2 = aantal 600W/720W lampen (of m² ÷ 1.5 voor 1000W lampen)
@@ -748,6 +780,7 @@ const THINKING_MSGS = [
   '🪴 Mijn moederplant fluistert me iets in...',
   '💡 600W aan ideeën aan het opwarmen...',
   '😤 Niet haast — slechte setups komen van slechte haast...',
+  '🤖 Liever een domme AI die snel antwoord?',
 ];
 let thinkingInterval = null;
 
@@ -835,7 +868,7 @@ function renderProducts(products, seo) {
             '<button class="qty-btn" onclick="changeQty(this,1)">+</button>' +
           '</div>' +
           '<span class="product-price line-price" data-unit="' + priceNum + '">€' + lineTotal.toFixed(2) + '</span>' +
-          '<span class="product-stock">✓ op voorraad</span>' +
+          '<span class="product-stock"></span>' +
           '<button class="btn-cart" onclick="addToCart(' + i + ')">Winkelmandje →</button>' +
           '<button class="btn-del" onclick="removeProduct(this)">✕</button>' +
         '</div>' +
@@ -960,7 +993,7 @@ async function sendMessage() {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-5',
         max_tokens: 2000,
         system: getSystem(text),
         messages: history.slice(-8)
@@ -1033,7 +1066,7 @@ async function sendMessage() {
               reason: item.reason || item.reden || item.doel || item.omschrijving || item.note || item.recommendation || item.calculation || '',
               url: item.url || item.link || '',
               img: item.img || item.afbeelding || item.image || '',
-              id: item.id || 0,
+              id: (item.id && item.id > 100) ? item.id : 0, // ignore sequential ids like 1,2,3
               qty: item.qty || item.aantal || 1,
               emoji: item.emoji || ''
             };
