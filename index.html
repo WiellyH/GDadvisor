@@ -79,6 +79,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
 .thinking-msg{transition:opacity .3s ease;font-style:italic;color:var(--muted) !important;background:var(--white) !important;border:1px dashed var(--border) !important}
+.choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.choice-btn{background:var(--white);border:1.5px solid var(--green);color:var(--green);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.choice-btn:hover:not(:disabled){background:var(--green-light)}
+.choice-btn:disabled{cursor:not-allowed}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 #chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 14px 4px;border-top:1px solid var(--border);background:var(--white)}
 .chip{font-size:11.5px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--white);color:var(--muted);font-family:inherit;transition:all .15s}
@@ -171,7 +175,7 @@ function searchProducts(query, n = 20) {
 function buildContextCatalog(query) {
   const results = searchProducts(query, 20);
   if (!results.length) return '';
-  const lines = results.map(p => '- ' + p.n + ' | ' + p.p + ' | URL: ' + p.u + ' | IMG: ' + p.i);
+  const lines = results.map(p => '- ' + p.n + ' | ' + p.p + ' | ID: ' + (p.id||'') + ' | URL: ' + p.u + ' | IMG: ' + p.i);
   return '\n\nBESCHIKBARE PRODUCTEN (gebruik ALLEEN deze URLs en prijzen — niet verzinnen):\n' + lines.join('\n') + '\n\nGEBRUIK UITSLUITEND de URLs en IMGs hierboven. Nooit aanpassen.';
 }
 const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdeal.nl.
@@ -261,6 +265,26 @@ Je mag UITSLUITEND producten aanbevelen die voorkomen in de "BESCHIKBARE PRODUCT
 Die sectie wordt per vraag dynamisch ingeladen vanuit de volledige catalog van 840 producten.
 NOOIT een URL, prijs of productnaam verzinnen. Als een product niet in de lijst staat, noem je het niet.
 URL formaat is ALTIJD exact zoals opgegeven — NOOIT /product/ toevoegen of de slug aanpassen.
+SPECIALE PRODUCTEN — UITGEBREIDE KENNIS (gebruik bij relevante vragen):
+
+MONSTER SOIL HOMEGROW POT 11L — Living Soil voor beginners:
+De Monster Soil Homegrow Pot is een kant-en-klare 11L pot, voorgevuld met 100% organische living soil. Ideaal voor thuiskweken zonder gedoe.
+Voordelen:
+- Alleen water toevoegen — geen voeding, geen pH meten, geen EC meten nodig
+- Gevuld met mychorrhiza-schimmels, Trichoderma en nuttige bacteriën die zichzelf reguleren
+- NPK 7-7-7 organisch — genoeg voor de hele cyclus van kiem tot oogst
+- Herbruikbaar: na oogst 3-4L verse aarde toevoegen voor volgende ronde
+- Gemaakt van: veenmos, regenwormencompost, kokosvezels, perliet, kalksteen
+- pH 6.4 — perfect voor indoor kweken
+- Speciaal voor beginners en drukke mensen die niet willen meten en mengen
+Aanbieden bij: beginners die organisch willen kweken, mensen zonder ervaring, vragen over "water-only grow", mensen die geen voedingsschema willen
+URL: https://www.growdeal.nl/monster-soil-homegrow-pot-11l/
+
+LIVING SOIL — concept uitleg:
+Living soil is levende aarde vol micro-organismen (bacteriën, schimmels, nematoden) die organisch materiaal afbreken en voedingsstoffen vrijmaken precies wanneer de plant ze nodig heeft. De plant regelt zelf wat ze opneemt. Geen kunstmest, geen pH-gedoe — de bodem doet het werk.
+
+
+
 GROEI KENNIS (gebruik dit bij vragen over kweken):
 
 LEVENSCYCLUS:
@@ -305,6 +329,48 @@ VENTILATIE VUISTREGEL:
 - Luchtvochtigheid: groeifase 50-70% | bloeifase 40-50% | laatste weken <45%
 - Temperatuur: dag 20-28°C | nacht 18-22°C | HPS tent maximaal 28°C
 
+
+INTERACTIEVE VRAGEN MET KEUZES:
+Na elke aanbeveling of als je meer info nodig hebt, stel je 1-2 vragen MET klikbare keuzes.
+Gebruik dit formaat exact (→ met spatie, dan A) B) C) etc):
+
+Welke voedingslijn heeft je voorkeur?
+→ A) BioBizz (organisch, ideaal voor beginners)
+→ B) DutchPro (professioneel, snel resultaat)
+→ C) Canna (allround, betrouwbaar)
+→ D) Goedkoopste optie
+→ E) Heb ik al / weet ik nog niet
+
+Hoe ervaren ben je?
+→ A) Eerste keer, wil het simpel houden
+→ B) Paar keer gedaan
+→ C) Gevorderd, wil maximale opbrengst
+
+Welk kweekmedium?
+→ A) Aarde (makkelijk, foutbestendig)
+→ B) Coco (sneller, meer controle)
+→ C) Hydro (maximale opbrengst)
+→ D) Adviseer me maar
+
+Heb je al meetapparatuur?
+→ A) Nee, nog niks
+→ B) Alleen pH meter
+→ C) pH en EC meter heb ik
+→ D) Aquamaster combo heb ik al
+
+Wat is je prioriteit?
+→ A) Zo goedkoop mogelijk starten
+→ B) Goede balans prijs en kwaliteit
+→ C) Beste kwaliteit, budget minder belangrijk
+→ D) Zo discreet mogelijk (geur!)
+
+Welk lichttype?
+→ A) LED (energiezuinig, minder warmte)
+→ B) HPS (krachtig, bewezen technologie)
+→ C) Weet ik niet, adviseer me
+
+Pas vragen aan op context. Vraag nooit wat je al weet. Max 2 vragen tegelijk.
+De klant kan op de knoppen klikken — antwoord dan direct met een bijgewerkte offerte.
 
 BELANGRIJK: 
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
@@ -354,11 +420,39 @@ function getSystem(query) {
 
 function addMsg(role, text) {
   const d = document.createElement('div');
-  d.className = `msg ${role}`;
-  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  d.innerHTML = `<div class="avatar">${role==='user'?'JIJ':'GD'}</div><div class="bubble">${formatted}</div>`;
+  d.className = 'msg ' + role;
+  let content = '';
+  if (role === 'assistant') {
+    const lines = text.split('\n');
+    let inChoices = false;
+    let choiceHtml = '';
+    lines.forEach(function(line) {
+      const m = line.match(/^→\s*([A-E]\).+)/);
+      if (m) {
+        if (!inChoices) { inChoices = true; choiceHtml = '<div class="choices">'; }
+        choiceHtml += '<button class="choice-btn" onclick="pickChoice(this)">' + m[1].trim() + '</button>';
+      } else {
+        if (inChoices) { content += choiceHtml + '</div>'; inChoices = false; choiceHtml = ''; }
+        const bold = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        if (bold.trim()) content += '<span>' + bold + '</span><br>';
+      }
+    });
+    if (inChoices) content += choiceHtml + '</div>';
+  } else {
+    content = '<span>' + text + '</span>';
+  }
+  d.innerHTML = '<div class="avatar">' + (role==='user'?'JIJ':'GD') + '</div><div class="bubble">' + content + '</div>';
   msgEl.appendChild(d);
   msgEl.scrollTop = msgEl.scrollHeight;
+}
+
+function pickChoice(btn) {
+  btn.closest('.choices').querySelectorAll('.choice-btn').forEach(function(b) {
+    b.disabled = true; b.style.opacity = '0.5';
+  });
+  btn.style.opacity = '1'; btn.style.background = 'var(--green)'; btn.style.color = '#fff';
+  inputEl.value = btn.textContent;
+  sendMessage();
 }
 
 const THINKING_MSGS = [
@@ -460,7 +554,7 @@ function renderProducts(products, seo) {
           '</div>' +
           '<span class="product-price line-price" data-unit="' + priceNum + '">€' + lineTotal.toFixed(2) + '</span>' +
           '<span class="product-stock">✓ op voorraad</span>' +
-          '<a href="' + (p.url||'#') + '" target="_blank" class="btn-cart">Winkelmandje →</a>' +
+          '<button class="btn-cart" onclick="addToCart(' + i + ')">Winkelmandje →</button>' +
           '<button class="btn-del" onclick="removeProduct(this)">✕</button>' +
         '</div>' +
       '</div>';
@@ -472,7 +566,43 @@ function renderProducts(products, seo) {
   pill.textContent = fmt; pill.style.display = 'inline-block';
 }
 
-function openAll() { offerteProds.forEach(p => p.url && window.open(p.url,'_blank')); }
+function addToCart(idx) {
+  const p = offerteProds[idx];
+  if (!p) return;
+  const qty = p.qty || 1;
+  const onGrowdeal = window.location.hostname.includes('growdeal.nl');
+  if (onGrowdeal && p.id) {
+    // WooCommerce AJAX — werkt alleen op growdeal.nl zelf
+    const btn = document.querySelectorAll('.btn-cart')[idx];
+    if (btn) { btn.textContent = 'Bezig...'; btn.disabled = true; }
+    fetch('/wp-admin/admin-ajax.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: 'action=add_to_cart&product_id=' + p.id + '&quantity=' + qty
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (btn) { btn.textContent = '✓ Toegevoegd!'; btn.style.background = '#27ae60'; }
+      // Update cart count if WooCommerce fragment refresh available
+      if (typeof wc_add_to_cart_params !== 'undefined') {
+        document.body.dispatchEvent(new CustomEvent('wc_fragment_refresh'));
+      }
+    })
+    .catch(() => { window.open(p.url, '_blank'); });
+  } else {
+    // Fallback: open product pagina
+    window.open(p.url || '#', '_blank');
+  }
+}
+
+function openAll() {
+  const onGrowdeal = window.location.hostname.includes('growdeal.nl');
+  if (onGrowdeal) {
+    offerteProds.forEach((p, i) => addToCart(i));
+  } else {
+    offerteProds.forEach(p => p.url && window.open(p.url, '_blank'));
+  }
+}
 
 function changeQty(btn, delta) {
   const card = btn.closest('.product-card');
