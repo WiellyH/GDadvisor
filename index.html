@@ -133,7 +133,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   <div id="right">
     <div id="chat-header">
       <div class="title">GrowDealz Setup Advisor</div>
-      <div class="sub">Beschrijf je situatie — ik stel je setup samen</div>
+      <div class="sub">Setup • Product zoeken • Advies • Kweekproblemen</div>
     </div>
     <div id="ctx-bar"></div>
     <div id="messages"></div>
@@ -276,27 +276,15 @@ KERNFUNCTIE — IJZEREN REGELS:
 4. Ook als je een vraag stelt: stuur een GEDEELTELIJKE offerte + 1 vraag
 5. Als je 10 lampen noemt: qty:10 in JSON. Altijd consistent.
 
-VERPLICHT FORMAAT — elk antwoord ziet er zo uit:
-[Korte tekst, max 60 woorden, geen bullets]
-<<<JSON>>>
-{
-  (gebruik EXACT deze tag, 3 < tekens aan elke kant)
-  "products": [
-    {
-      "name": "Productnaam exact uit catalogus",
-      "price": "€xx.xx",
-      "category": "Categorie",
-      "reason": "Waarom dit product",
-      "url": "https://www.growdeal.nl/slug/",
-      "img": "https://www.growdeal.nl/wp-content/...",
-      "qty": 1
-    }
-  ]
-}
-<<<ENDJSON>>>
-[Optioneel: 1 vervolgvraag met → keuzes]
+VERPLICHT FORMAAT — ALTIJD exact zo:
 
-KRITISCH: geen tekst, backticks of uitleg BINNEN de <<<JSON>>> tags. Puur geldige JSON.
+[max 60 woorden tekst]
+<<<JSON>>>
+{"products":[{"name":"...","price":"€x","category":"...","reason":"...","url":"https://www.growdeal.nl/slug/","img":"https://...","qty":1}]}
+<<<ENDJSON>>>
+
+DE TAGS ZIJN: <<<JSON>>> en <<<ENDJSON>>> — drie kleiner-dan tekens, dan JSON of ENDJSON, dan drie groter-dan tekens.
+NOOIT: <<>>, backtick-json, <JSON>, [JSON] of andere varianten. ALLEEN <<<JSON>>> en <<<ENDJSON>>>.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
@@ -1570,7 +1558,7 @@ function sendChip(el) { inputEl.value = el.textContent; sendMessage(); }
 inputEl.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
 inputEl.addEventListener('input', () => { inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,100)+'px'; });
 
-addMsg('assistant', 'Hallo! Beschrijf je kweeksituatie — ruimtegrootte, verlichtingsvoorkeur, budget of een kweekprobleem — en ik stel direct een complete setup samen met producten van growdeal.nl.');
+addMsg('assistant', 'Hey! Ik ben je persoonlijke grow-adviseur van GrowDeal.nl 🌱\n\nVertel me wat je nodig hebt — ik help je met:\n• Complete setup samenstellen (tent + licht + ventilatie + voeding)\n• Specifiek product zoeken ("zoek de goedkoopste pH meter")\n• Beste keuze per categorie ("welke LED is het beste voor 80×80?")\n• Kweekproblemen oplossen ("mijn planten worden geel")\n• Bestaande offerte aanvullen of aanpassen\n\nOf klik gewoon een van de voorbeelden hieronder!');
 </script>
 </body>
 </html>
