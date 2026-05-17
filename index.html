@@ -153,9 +153,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <p>Stel een vraag in de chat. De advisor selecteert direct de beste producten voor jouw situatie.</p>
     </div>
     <div id="products"></div>
-    <div id="totaal-bar">
+    <!-- Lead capture modal -->
+<div id="lead-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:16px;padding:28px;max-width:400px;width:90%;margin:0 16px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="font-size:22px;margin-bottom:4px">🌱 Offerte bewaren</div>
+    <div style="color:var(--muted);font-size:14px;margin-bottom:20px">Vul je gegevens in — we sturen je offerte per mail toe en GrowDeal kan je verder helpen.</div>
+    <input id="lead-name" type="text" placeholder="Je naam" style="width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px">
+    <input id="lead-email" type="email" placeholder="Je e-mailadres" style="width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px">
+    <input id="lead-phone" type="tel" placeholder="Telefoonnummer (optioneel)" style="width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px">
+    <button onclick="submitLead()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">Offerte opslaan & versturen 📧</button>
+    <button onclick="closeLead()" style="width:100%;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--muted)">Niet nu</button>
+  </div>
+</div>
+
+<div id="totaal-bar">
       <div><div class="total-label">Totaal incl. BTW</div><div class="total-amount" id="total-price">€0</div></div>
-      <button class="btn-all" onclick="openAll()">Alles in winkelmandje →</button>
+      <button class="btn-all" onclick="handleCheckout()">Alles in winkelmandje →</button>
     </div>
   </div>
   <div id="right">
@@ -1692,6 +1705,7 @@ function mergeProducts(newProds, addOnly) {
   });
 
   renderProducts(offerteProds, null);
+  checkLeadTrigger();
 }
 
 function addToCart(idx) {
@@ -1883,6 +1897,63 @@ function clearImage() {
   pendingImageBase64 = null;
   pendingImageType = null;
   document.getElementById('img-preview-bar').style.display = 'none';
+}
+
+// LEAD CAPTURE
+var leadCaptured = false;
+
+function handleCheckout() {
+  if (leadCaptured) { openAll(); return; }
+  document.getElementById('lead-modal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('lead-name').focus(); }, 100);
+}
+
+function closeLead() {
+  document.getElementById('lead-modal').style.display = 'none';
+  openAll();
+}
+
+function submitLead() {
+  var name = document.getElementById('lead-name').value.trim();
+  var email = document.getElementById('lead-email').value.trim();
+  var phone = document.getElementById('lead-phone').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('lead-email').style.borderColor = '#e74c3c';
+    document.getElementById('lead-email').focus();
+    return;
+  }
+  leadCaptured = true;
+  document.getElementById('lead-modal').style.display = 'none';
+  var total = offerteProds.reduce(function(s,p){ return s + parsePrice(p.price)*(p.qty||1); }, 0);
+  var offerteText = offerteProds.slice(0,8).map(function(p){ return (p.qty||1)+'x '+p.name; }).join(', ');
+  fetch(WORKER, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      type: 'lead',
+      name: name || 'onbekend',
+      email: email,
+      phone: phone || '-',
+      total: String.fromCharCode(8364) + total.toFixed(2),
+      offerte: offerteText,
+      ctx: Object.entries(ctx).map(function(e){ return e[0]+': '+e[1]; }).join(' | '),
+      timestamp: new Date().toISOString()
+    })
+  }).catch(function(e){ console.log('Lead error:', e); });
+  addMsg('assistant', 'Gegevens opgeslagen! GrowDeal mailt je offerte naar '+email+' en neemt binnen 1-2 werkdagen contact op.');
+  openAll();
+}
+
+function checkLeadTrigger() {
+  if (leadCaptured) return;
+  var total = offerteProds.reduce(function(s,p){ return s + parsePrice(p.price)*(p.qty||1); }, 0);
+  if (total >= 200 && offerteProds.length >= 4) {
+    leadCaptured = true;
+    setTimeout(function() {
+      addMsg('assistant', 'Je offerte loopt aardig op! Klik op "Alles in winkelmandje" om je gegevens achter te laten zodat GrowDeal je offerte ook per mail toestuurt.');
+      leadCaptured = false;
+    }, 800);
+  }
 }
 
 async function sendMessage() {
