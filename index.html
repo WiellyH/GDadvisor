@@ -783,9 +783,10 @@ BELANGRIJK:
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
 - Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
 - Bij TOEVOEGING: stuur alleen de toe te voegen producten
-- Bij VERWIJDERING: stuur een product met "remove":true en dezelfde naam
+- Bij VERWIJDERING: stuur {"name":"exacte naam uit offerte","remove":true} — ALLEEN voor producten die in de genummerde HUIDIGE OFFERTE staan
+- NOOIT remove:true sturen voor producten die niet in de offerte staan — de app doet kit-vervanging automatisch
+- Bij kit toevoegen: stuur ALLEEN de kit zelf — de app verwijdert automatisch de losse onderdelen die de kit vervangt
 - NOOIT ongewijzigde producten meesturen — de app houdt de offerte bij
-- De app herkent merkvervangingen, groottevervangingen en categoriebyte automatisch
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
 - Alle URLs zijn van growdeal.nl (Nederlandse site) — NOOIT zelf een URL verzinnen
 - URL formaat is ALTIJD: https://www.growdeal.nl/[slug]/ ZONDER /product/ erin
@@ -874,9 +875,10 @@ BELANGRIJK:
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
 - Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
 - Bij TOEVOEGING: stuur alleen de toe te voegen producten
-- Bij VERWIJDERING: stuur een product met "remove":true en dezelfde naam
+- Bij VERWIJDERING: stuur {"name":"exacte naam uit offerte","remove":true} — ALLEEN voor producten die in de genummerde HUIDIGE OFFERTE staan
+- NOOIT remove:true sturen voor producten die niet in de offerte staan — de app doet kit-vervanging automatisch
+- Bij kit toevoegen: stuur ALLEEN de kit zelf — de app verwijdert automatisch de losse onderdelen die de kit vervangt
 - NOOIT ongewijzigde producten meesturen — de app houdt de offerte bij
-- De app herkent merkvervangingen, groottevervangingen en categoriebyte automatisch
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
 - Alle URLs zijn van growdeal.nl (Nederlandse site) — NOOIT zelf een URL verzinnen
 - URL formaat is ALTIJD: https://www.growdeal.nl/[slug]/ ZONDER /product/ erin
@@ -933,8 +935,11 @@ function getSystem(query) {
     offerteProds.forEach(function(p, i) {
       prefContext += (i+1) + '. ' + p.name + ' | ' + p.price + ' | qty:' + (p.qty||1) + ' | cat:' + (p.category||'') + '\n';
     });
-    prefContext += '\nBij verwijderen: stuur {"name":"[exacte naam]","remove":true}';
-    prefContext += '\nBij vervangen: stuur het nieuwe product, het oude wordt automatisch vervangen op basis van merk/categorie.';
+    prefContext += '\n\nREGELS voor aanpassen van offerte:';
+    prefContext += '\n- Remove: ALLEEN voor namen die EXACT hierboven staan';
+    prefContext += '\n- Kit toevoegen: stuur alleen de kit, losse onderdelen verdwijnen automatisch';
+    prefContext += '\n- Merk wisselen: stuur nieuwe merk, oud merk verdwijnt automatisch';
+    prefContext += '\n- Grootte wisselen: stuur nieuw formaat, oud formaat verdwijnt automatisch';
   }
   
   return SYSTEM.replace('{CONTEXT}', ctxStr) + prefContext + dynamicCatalog;
