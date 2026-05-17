@@ -181,59 +181,87 @@ function searchProducts(query, n = 20) {
 // Build a mini catalog string from search results to inject into system prompt
 function buildContextCatalog(query) {
   const q = query.toLowerCase();
-  
-  // Always include key categories for complete setups
-  var categorySearches = [
-    {terms: ['tent','kweektent','growbox','growzelt'], max: 3},
-    {terms: ['led','hps','lamp','licht','verlichting','ballast'], max: 4},
-    {terms: ['afzuiger','ventilat','filter','koolstof','luchtslang'], max: 4},
-    {terms: ['pot','kweekpot','stoffen','fabric'], max: 3},
-    {terms: ['biobizz'], max: 3},
-    {terms: ['canna'], max: 3},
-    {terms: ['dutchpro'], max: 3},
-    {terms: ['plagron'], max: 3},
-    {terms: ['advanced nutrients','advanced'], max: 4},
-    {terms: ['atami','hesi','bac','aptus'], max: 2},
-    {terms: ['ph','ec','meter','aquamaster'], max: 3},
-    {terms: ['controller','timer','klimaat','thermostaat','hygrometer'], max: 3},
-    {terms: ['clipfan','slangklem','ratchet','rope','ophang'], max: 3},
-    {terms: ['gen200','flower bomb','calmag'], max: 3},
-    {terms: ['rhodos'], max: 3},
-    {terms: ['coco','substraat','aarde','soil','all-mix','light-mix'], max: 3},
-    {terms: ['monster soil','homegrow'], max: 2},
-    {terms: ['complete kweektent','complete kweekset'], max: 3},
-  ];
-  
   var allResults = [];
   var seenUrls = new Set();
-  
-  // First: search the actual query broadly
-  var mainResults = searchProducts(query, 10);
-  mainResults.forEach(function(p) {
-    if (!seenUrls.has(p.u)) { seenUrls.add(p.u); allResults.push(p); }
-  });
-  
-  // Then: fill in category gaps for complete setup context
-  categorySearches.forEach(function(cat) {
-    // Check if query is relevant to this category
-    var catRelevant = cat.terms.some(function(t) { return q.includes(t); });
-    // Always include if it's a setup/complete/tent query
-    var isSetup = q.includes('setup') || q.includes('tent') || q.includes('complete') || q.includes('kweek') || allResults.length > 5;
-    
-    if (catRelevant || isSetup) {
-      var catQuery = cat.terms[0];
-      var catResults = searchProducts(catQuery, cat.max + 2);
-      catResults.slice(0, cat.max).forEach(function(p) {
-        if (!seenUrls.has(p.u)) { seenUrls.add(p.u); allResults.push(p); }
-      });
-    }
-  });
-  
+
+  function addR(searchQuery, max) {
+    searchProducts(searchQuery, max).forEach(function(p) {
+      if (!seenUrls.has(p.u)) { seenUrls.add(p.u); allResults.push(p); }
+    });
+  }
+
+  // 1. Broad query search
+  addR(query, 15);
+
+  // 2. Context detection
+  var isSetup = /setup|tent|complete|kweek|inrichten|beginnen|starten/.test(q);
+  var isHPS   = /hps|ballast|natriumlamp/.test(q);
+  var isLED   = /led|quantum/.test(q);
+  var isVoed  = /voeding|nutrient|biobizz|canna|dutchpro|plagron|advanced|rhodos|atami/.test(q);
+  var isCoco  = /coco/.test(q);
+
+  // 3. ALWAYS load ventilation set components
+  addR('koolstoffilter', 4);
+  addR('combiconnect', 3);
+  addR('slangklem', 3);
+  addR('afzuiger centro', 4);
+
+  // 4. ALWAYS load key accessories
+  addR('clipfan', 2);
+  addR('rope ratchet', 2);
+  addR('timer schakelklok', 2);
+  addR('thermo hygrometer', 2);
+  addR('ph meter', 2);
+  addR('ec meter', 2);
+  addR('gen200', 2);
+  addR('flower bomb', 2);
+  addR('biobizz ph', 2);
+
+  // 5. Setup additions
+  if (isSetup || isHPS || isLED) {
+    addR('kweektent eco', 4);
+    addR('stoffen kweekpot', 3);
+    addR('complete kweektent', 3);
+  }
+
+  // 6. HPS full kit
+  if (isHPS) {
+    addR('platinum electronische vsa 600', 2);
+    addR('platinum wing reflector', 2);
+    addR('hamerslag reflector', 2);
+    addR('horti sun hps', 2);
+  }
+
+  // 7. LED
+  if (isLED || isSetup) {
+    addR('platinum king led', 3);
+    addR('sunpro hitter', 2);
+    addR('quantumboard led', 3);
+  }
+
+  // 8. Voeding
+  if (isVoed || isSetup) {
+    if (/biobizz/.test(q))   { addR('biobizz bio grow', 4); addR('biobizz bio bloom', 3); addR('biobizz top max', 2); }
+    if (/canna/.test(q))     { addR('canna terra', 4); addR('canna hydro', 3); addR('cannazym', 2); addR('rhizotonic', 2); }
+    if (/dutchpro/.test(q))  { addR('dutchpro grow', 4); addR('dutchpro bloom', 3); addR('dutchpro take root', 2); }
+    if (/advanced/.test(q))  { addR('advanced nutrients', 8); }
+    if (/rhodos/.test(q))    { addR('rhodos base', 2); addR('rhodos grow', 2); addR('rhodos bloom', 2); }
+    if (/plagron/.test(q))   { addR('plagron', 4); }
+    if (/atami/.test(q))     { addR('atami', 4); }
+    if (!isVoed) { addR('biobizz bio grow', 2); addR('dutchpro grow', 2); }
+  }
+
+  // 9. Medium
+  if (isCoco)              { addR('coco substraat', 3); addR('canna coco', 2); }
+  else if (isSetup)        { addR('biobizz all-mix', 2); addR('light-mix', 2); }
+
   if (!allResults.length) return '';
   var lines = allResults.map(function(p) {
     return '- ' + p.n + ' | ' + p.p + ' | ID: ' + (p.id||0) + ' | URL: ' + p.u + ' | IMG: ' + p.i;
   });
-  return '\n\nBESCHIKBARE PRODUCTEN (' + allResults.length + ' producten, gebruik ALLEEN deze URLs):\n' + lines.join('\n') + '\n\nGEBRUIK UITSLUITEND bovenstaande URLs en IMGs. Nooit zelf verzinnen.';
+  return '\n\nBESCHIKBARE PRODUCTEN (' + allResults.length + ' uit 840+, gebruik ALLEEN deze URLs):\n'
+    + lines.join('\n')
+    + '\n\nGEBRUIK UITSLUITEND deze URLs en IMGs. Nooit verzinnen.';
 }
 const SYSTEM = `Je bent de GrowDealz Setup Advisor — een deskundige grow-adviseur voor growdeal.nl.
 
