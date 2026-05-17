@@ -309,6 +309,8 @@ KERNFUNCTIE — IJZEREN REGELS:
    - Doseringen: alleen wat je zeker weet. Zeg "check de verpakking of growdeal.nl voor exacte dosering" als je twijfelt
    - Kweekadvies: geef je best bekende antwoord + "check cnnbs.nl voor meer details"
    - Nooit een prijs, URL of productnaam verzinnen — dan liever zeggen: "Zoek op growdeal.nl naar [productnaam]"
+   - NOOIT een totaalprijs noemen — zeg altijd "zie het totaal links in beeld" want jij kent de echte prijs niet
+   - Als je toch een totaal noemt: gebruik ALLEEN het "WERKELIJK TOTAAL" uit de offerte context hierboven
    - Als je een voedingsschema niet zeker weet: verwijs naar merkwebsite of growdeal.nl/blog
 
 VERPLICHT FORMAAT — ALTIJD exact zo:
@@ -1097,7 +1099,12 @@ function getSystem(query) {
     offerteProds.forEach(function(p, i) {
       prefContext += (i+1) + '. ' + p.name + ' | ' + p.price + ' | qty:' + (p.qty||1) + ' | cat:' + (p.category||'') + '\n';
     });
+    var realTotal = offerteProds.reduce(function(s,p) { 
+      return s + parsePrice(p.price) * (p.qty||1); 
+    }, 0);
+    prefContext += '\nWERKELIJK TOTAAL (links in beeld): €' + realTotal.toFixed(2);
     prefContext += '\n\n⚠️ DIT IS DE ENIGE BRON VAN WAARHEID — negeer alle eerdere offerte-vermeldingen in het gesprek.';
+    prefContext += '\nNOOIT een totaalprijs noemen die afwijkt van het werkelijke totaal hierboven!';
     prefContext += '\n- Remove: ALLEEN voor namen die EXACT hierboven staan';
     prefContext += '\n- Als een product NIET hierboven staat, bestaat het NIET in de offerte';
     prefContext += '\n- Kit toevoegen: stuur alleen de kit, losse onderdelen verdwijnen automatisch';
