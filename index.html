@@ -395,6 +395,8 @@ Standaard complete tent set bevat ALTIJD:
 
 REGELS:
 - TENT ALTIJD EERSTE in de offerte — nooit weglaten, ook niet bij grote setups
+- Bij "80×80 tent met HPS" of "80×80 tent met LED": ALTIJD tent + licht + ventilatie in de JSON
+- NOOIT alleen de lamp sturen als iemand een tent-setup vraagt
 - Bij grote ruimte (>4m²): bereken ALTIJD aantal lampen via grid, nooit minder dan logisch
 - Bij "losse driver" vraag: Spektra Master 720W of BYD 720W aanbevelen
 - Bij HPS: altijd complete kit aanbevelen (ballast + reflector + lamp) — nooit alleen de lamp
@@ -935,16 +937,20 @@ function getSystem(query) {
   if (changedQty.length > 0) {
     prefContext += '\nKLANT HEEFT AANTALLEN AANGEPAST: ' + changedQty.map(c => c.name + ' → ' + c.qty + 'x').join(', ');
   }
+  if (offerteProds.length === 0) {
+    prefContext += '\n\n=== ACTUELE OFFERTE — LEEG (geen producten) ===';
+    prefContext += '\nDe offerte is leeg. Zeg NOOIT dat er producten in zitten.';
+  }
   if (offerteProds.length > 0) {
-    prefContext += '\n\nHUIDIGE OFFERTE (genummerd — gebruik deze nummers bij verwijderen/vervangen):\n';
+    prefContext += '\n\n=== ACTUELE OFFERTE — ALLEEN DIT STAAT ER IN ===\n';
     offerteProds.forEach(function(p, i) {
       prefContext += (i+1) + '. ' + p.name + ' | ' + p.price + ' | qty:' + (p.qty||1) + ' | cat:' + (p.category||'') + '\n';
     });
-    prefContext += '\n\nREGELS voor aanpassen van offerte:';
+    prefContext += '\n\n⚠️ DIT IS DE ENIGE BRON VAN WAARHEID — negeer alle eerdere offerte-vermeldingen in het gesprek.';
     prefContext += '\n- Remove: ALLEEN voor namen die EXACT hierboven staan';
+    prefContext += '\n- Als een product NIET hierboven staat, bestaat het NIET in de offerte';
     prefContext += '\n- Kit toevoegen: stuur alleen de kit, losse onderdelen verdwijnen automatisch';
     prefContext += '\n- Merk wisselen: stuur nieuwe merk, oud merk verdwijnt automatisch';
-    prefContext += '\n- Grootte wisselen: stuur nieuw formaat, oud formaat verdwijnt automatisch';
   }
   
   return SYSTEM.replace('{CONTEXT}', ctxStr) + prefContext + dynamicCatalog;
@@ -1213,6 +1219,23 @@ function mergeProducts(newProds) {
       .replace(/\s+/g, ' ').trim();
   }
 
+  // Skip all removal logic if addOnly mode
+  if (addOnly) {
+    newProds.forEach(function(np) {
+      if (np.remove === true) return; // ignore remove flags in addOnly mode
+      var existing = offerteProds.findIndex(function(op) {
+        return op.name && np.name && op.name.toLowerCase() === np.name.toLowerCase();
+      });
+      if (existing >= 0) {
+        offerteProds[existing] = Object.assign(offerteProds[existing], np);
+      } else {
+        offerteProds.unshift(np); // Add to TOP of list
+      }
+    });
+    renderProducts(offerteProds, null);
+    return;
+  }
+
   // Step 0: detect if a COMPLETE KIT is being added → remove loose components it replaces
   newProds.forEach(function(np) {
     var kitType = getKitType(np.name);
@@ -1238,8 +1261,14 @@ function mergeProducts(newProds) {
     var brand = getBrand(np.name);
     var cat = (np.category || '').toLowerCase();
     if (brand) {
-      var key = brand + '::' + cat;
-      newBrandCats[key] = true;
+      // Only track brand replacements for actual product categories, not stackables
+      var stackableCats2 = ['additief','additieven','accessoire','accessoires','meting','meter','controller','ophang','timer','hygrometer','slangklem','clipfan','rope'];
+      var catLower = (np.category || '').toLowerCase();
+      var isStackable2 = stackableCats2.some(function(sc) { return catLower.includes(sc); });
+      if (!isStackable2) {
+        var key = brand + '::' + catLower;
+        newBrandCats[key] = true;
+      }
     }
   });
 
@@ -1259,12 +1288,16 @@ function mergeProducts(newProds) {
     }
 
     // Check if a DIFFERENT brand in same category is being added (brand swap)
-    var newBrandsInCat = newProds.filter(function(np) {
-      return (np.category || '').toLowerCase() === cat && getBrand(np.name) !== brand;
-    });
-    if (newBrandsInCat.length > 0) {
-      // Brand swap detected - remove old brand from this category
-      toRemove.push(idx);
+    // BUT: never auto-remove additives, accessories, meters, controllers - those stack!
+    var stackableCats = ['additief','additieven','accessoire','accessoires','meting','meter','controller','ophang','timer','hygrometer','slangklem','clipfan','rope'];
+    var isStackable = stackableCats.some(function(sc) { return cat.includes(sc); });
+    if (!isStackable) {
+      var newBrandsInCat = newProds.filter(function(np) {
+        return (np.category || '').toLowerCase() === cat && getBrand(np.name) !== brand;
+      });
+      if (newBrandsInCat.length > 0) {
+        toRemove.push(idx);
+      }
     }
   });
 
@@ -1294,7 +1327,7 @@ function mergeProducts(newProds) {
     if (existing >= 0) {
       offerteProds[existing] = Object.assign(offerteProds[existing], np);
     } else {
-      offerteProds.push(np);
+      offerteProds.unshift(np); // New products go to TOP
     }
   });
 
@@ -1576,7 +1609,14 @@ async function sendMessage() {
     }
     
     if (jsonData && jsonData.products) {
-      mergeProducts(jsonData.products);
+      // Detect additive intent from last user message
+      var lastUserMsg = '';
+      for (var i = history.length - 1; i >= 0; i--) {
+        if (history[i].role === 'user') { lastUserMsg = history[i].content.toLowerCase(); break; }
+      }
+      var addOnlyPatterns = /voeg.*toe|voeg.*bij|zet.*erbij|ook.*nodig|ik wil ook|ik wil een|ook.*toevoegen|toevoegen|aanvullen|add|ook.*graag|erbij.*zetten|ook.*hebben/;
+      var isAddOnly = addOnlyPatterns.test(lastUserMsg);
+      mergeProducts(jsonData.products, isAddOnly);
     }
   } catch(e) {
     removeTyping();
