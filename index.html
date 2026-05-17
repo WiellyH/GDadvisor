@@ -1893,9 +1893,9 @@ async function sendMessage() {
   inputEl.value = ''; inputEl.style.height = 'auto';
   document.getElementById('chips').style.display = 'none';
   sendBtn.disabled = true;
-  extractCtx(text);
-  addMsg('user', text);
-  history.push({role:'user', content:text});
+  extractCtx(sendText);
+  addMsg('user', sendText, pendingImageBase64 ? pendingImageType : null, pendingImageBase64);
+  history.push({role:'user', content:sendText});
   showTyping();
 
   try {
@@ -1905,7 +1905,7 @@ async function sendMessage() {
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 4000,
-        system: getSystem(text),
+        system: getSystem(sendText),
         messages: (function() {
           var msgs = history.slice(-8);
           // If there's a pending image, attach it to the last user message
