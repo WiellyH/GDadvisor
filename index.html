@@ -1548,6 +1548,67 @@ function removeProduct(btn) {
   }, 200);
 }
 
+async function openSearchPanel() {
+  var panel = document.getElementById('search-panel');
+  panel.style.display = 'block';
+  document.getElementById('product-search-input').focus();
+  document.getElementById('search-results').innerHTML = '';
+}
+
+function closeSearchPanel() {
+  document.getElementById('search-panel').style.display = 'none';
+  document.getElementById('product-search-input').value = '';
+  document.getElementById('search-results').innerHTML = '';
+}
+
+function searchAndShow(query) {
+  var resultsEl = document.getElementById('search-results');
+  if (!query || query.length < 2) { resultsEl.innerHTML = ''; return; }
+  var results = searchProducts(query, 12);
+  resultsEl.innerHTML = '';
+  if (!results.length) {
+    resultsEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Geen producten gevonden voor "'+query+'"</div>';
+    return;
+  }
+  results.forEach(function(p) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--white)';
+    div.onmouseover = function(){ this.style.background = 'var(--bg)'; };
+    div.onmouseout = function(){ this.style.background = 'var(--white)'; };
+    div.onclick = function() { addSearchResult(p.u, p.i, p.n, p.p); };
+    var imgEl = document.createElement('img');
+    imgEl.src = p.i || '';
+    imgEl.style.cssText = 'width:36px;height:36px;object-fit:contain;border-radius:4px;background:#f5f5f5;flex-shrink:0';
+    imgEl.onerror = function(){ this.style.display='none'; };
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    info.innerHTML = '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.n+'</div><div style="font-size:12px;color:var(--green);font-weight:600">'+(p.p||'')+'</div>';
+    var plus = document.createElement('div');
+    plus.style.cssText = 'font-size:18px;color:var(--green);font-weight:700;flex-shrink:0';
+    plus.textContent = '+';
+    div.appendChild(imgEl);
+    div.appendChild(info);
+    div.appendChild(plus);
+    resultsEl.appendChild(div);
+  });
+}
+
+function addSearchResult(url, img, name, price) {
+  var newProd = {name: name, price: price, url: url, img: img, qty: 1, category: 'Toegevoegd', reason: 'Handmatig toegevoegd'};
+  offerteProds.unshift(newProd);
+  renderProducts(offerteProds, null);
+  document.getElementById('products').style.display = 'block';
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('totaal-bar').style.display = 'flex';
+  document.getElementById('total-pill').style.display = 'block';
+  // Update total
+  var total = offerteProds.reduce(function(s,p) { return s + parsePrice(p.price) * (p.qty||1); }, 0);
+  document.getElementById('total-price').textContent = '€' + total.toFixed(0);
+  document.getElementById('total-pill').textContent = '€' + total.toFixed(0);
+  // Close panel after adding
+  closeSearchPanel();
+}
+
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text) return;
