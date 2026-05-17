@@ -1430,15 +1430,21 @@ async function sendMessage() {
     let jsonData = null;
     // ALWAYS strip JSON blocks from chat text first
     let chatText = raw
-      .replace(/<<+[A-Z]*>>+[\s\S]*?<<+[A-Z]*ENDJSON[A-Z]*>>+/g, '')
-      .replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g, '')
-      .replace(/<<>>[\s\S]*?(?=\n\n|$)/g, '')
-      .replace(/```json[\s\S]*?```/g, '')
-      .replace(/```[\s\S]*?```/g, '')
+      .replace(/<<+[A-Z]*>>+[\s\S]*?<<+[A-Z]*>>+/gi, '')
+      .replace(/```[a-z]*[\s\S]*?```/gi, '')
+      .replace(/\{[\s\S]*?"products"[\s\S]*\}/g, '')
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
-    const tagMatch = raw.match(/<<+JSON>>+([\s\S]*?)<<+ENDJSON>>+/) || raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
-    const tickMatch = raw.match(/```json([\s\S]*?)```/);
-    const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : null;
+    // Catch ALL tag variants: <<<JSON>>>, <<>>, <<JSON>>, <JSON> etc
+    const tagMatch = raw.match(/<<+J?S?O?N?>>+([\s\S]*?)<<+\/?E?N?D?J?S?O?N?>>+/i)
+                  || raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/i);
+    const tickMatch = raw.match(/```json([\s\S]*?)```/i)
+                   || raw.match(/`{3}([\s\S]*?)`{3}/);
+    // Fallback: find bare JSON with products array
+    const bareMatch = (!tagMatch && !tickMatch) 
+                    ? raw.match(/(\{[^{}]*"products"[\s\S]*\})[^}]*$/) 
+                    : null;
+    const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : bareMatch ? bareMatch[1] : null;
     if (rawCand) {
       const cand = rawCand.trim();
       try {
