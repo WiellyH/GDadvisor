@@ -288,7 +288,7 @@ function buildContextCatalog(query) {
     if (/canna/.test(q))     { addR('canna terra', 4); addR('canna hydro', 3); addR('cannazym', 2); addR('rhizotonic', 2); }
     if (/dutchpro/.test(q))  { addR('dutchpro grow', 4); addR('dutchpro bloom', 3); addR('dutchpro take root', 2); }
     if (/advanced/.test(q))  { addR('advanced nutrients', 8); }
-    if (/rhodos/.test(q))    { addR('rhodos base', 2); addR('rhodos grow', 2); addR('rhodos bloom', 2); }
+    if (/rhodos/.test(q))    { addR('rhodos base', 3); addR('rhodos grow', 3); addR('rhodos bloom', 3); } // extra bij expliciete rhodos vraag
     if (/plagron/.test(q))   { addR('plagron', 4); }
     if (/atami/.test(q))     { addR('atami', 4); }
     if (!isVoed) { addR('biobizz bio grow', 2); addR('dutchpro grow', 2); }
@@ -394,9 +394,12 @@ VERPLICHT FORMAAT — ALTIJD exact zo:
 
 DE TAGS ZIJN: <<<JSON>>> en <<<ENDJSON>>> — drie kleiner-dan tekens, dan JSON of ENDJSON, dan drie groter-dan tekens.
 NOOIT: <<>>, backtick-json, <JSON>, [JSON] of andere varianten. ALLEEN <<<JSON>>> en <<<ENDJSON>>>.
-COMPACT JSON — gebruik GEEN spaties/enters in JSON, alles op 1 regel per product:
-{"products":[{"name":"...","price":"€x","category":"...","reason":"kort","url":"https://...","img":"https://...","qty":1},{"name":"..."}]}
-Reason max 8 woorden. Geen lege velden. Dit voorkomt dat JSON wordt afgekapt.
+ULTRA-COMPACT JSON — alles op 1 regel, reason max 5 woorden, geen spaties buiten strings:
+<<<JSON>>>
+{"products":[{"name":"Productnaam","price":"€x","category":"Cat","reason":"Kort reden","url":"https://www.growdeal.nl/slug/","img":"https://www.growdeal.nl/wp-content/uploads/x.jpg","qty":1}]}
+<<<ENDJSON>>>
+Bij 20+ producten: ALLE producten in 1 JSON blok. Nooit splitsen over meerdere berichten.
+Reason MAXIMAAL 5 woorden — liever korter dan afkappen.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
@@ -1863,7 +1866,7 @@ async function sendMessage() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 2500,
+        max_tokens: 4000,
         system: getSystem(text),
         messages: (function() {
           var msgs = history.slice(-8);
