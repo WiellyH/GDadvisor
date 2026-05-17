@@ -752,10 +752,12 @@ REGELS voor vragen:
 - NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
 
 BELANGRIJK:
-- Bij vervolgvragen: voeg toe aan de offerte of update bestaande producten — NOOIT de hele offerte weggooien
-- Als iemand zegt "gebruik coco": voeg coco medium toe, verwijder aarde, rest blijft staan
-- Als iemand een vraag beantwoordt: update alleen het relevante deel van de offerte
-- Stuur altijd de COMPLETE bijgewerkte products array terug, inclusief producten die al in de offerte staan
+- Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
+- Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
+- Bij TOEVOEGING: stuur alleen de toe te voegen producten
+- Bij VERWIJDERING: stuur een product met "remove":true en dezelfde naam
+- NOOIT ongewijzigde producten meesturen — de app houdt de offerte bij
+- De app herkent merkvervangingen, groottevervangingen en categoriebyte automatisch
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
 - Alle URLs zijn van growdeal.nl (Nederlandse site) — NOOIT zelf een URL verzinnen
 - URL formaat is ALTIJD: https://www.growdeal.nl/[slug]/ ZONDER /product/ erin
@@ -841,10 +843,12 @@ REGELS voor vragen:
 - NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
 
 BELANGRIJK:
-- Bij vervolgvragen: voeg toe aan de offerte of update bestaande producten — NOOIT de hele offerte weggooien
-- Als iemand zegt "gebruik coco": voeg coco medium toe, verwijder aarde, rest blijft staan
-- Als iemand een vraag beantwoordt: update alleen het relevante deel van de offerte
-- Stuur altijd de COMPLETE bijgewerkte products array terug, inclusief producten die al in de offerte staan
+- Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
+- Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
+- Bij TOEVOEGING: stuur alleen de toe te voegen producten
+- Bij VERWIJDERING: stuur een product met "remove":true en dezelfde naam
+- NOOIT ongewijzigde producten meesturen — de app houdt de offerte bij
+- De app herkent merkvervangingen, groottevervangingen en categoriebyte automatisch
 - Gebruik ALTIJD de exacte URL en IMG uit de RELEVANTE PRODUCTEN sectie hieronder
 - Alle URLs zijn van growdeal.nl (Nederlandse site) — NOOIT zelf een URL verzinnen
 - URL formaat is ALTIJD: https://www.growdeal.nl/[slug]/ ZONDER /product/ erin
@@ -1078,19 +1082,139 @@ function renderProducts(products, seo) {
 }
 
 function mergeProducts(newProds) {
-  // Add new products, update existing ones by name, never wipe the list
+  if (!newProds || !newProds.length) return;
+
+  // Kit definitions - what each complete kit INCLUDES (so we can remove duplicates)
+  var KIT_INCLUDES = {
+    'garden highpro complete': ['tent','kweektent','led','lamp','verlichting','afzuiger','ventilat','filter','koolstof','clipfan','pot','kweekpot','timer','schakelklok','hygrometer','thermo','rope ratchet','ophang','slangklem','combiconnect'],
+    'complete kweektent': ['tent','kweektent','led','lamp','verlichting','afzuiger','ventilat','filter','koolstof','clipfan','pot','kweekpot','timer','schakelklok','hygrometer','thermo','rope ratchet','ophang','slangklem'],
+  };
+
+  function getKitType(name) {
+    name = (name || '').toLowerCase();
+    for (var kit in KIT_INCLUDES) {
+      if (name.includes(kit)) return kit;
+    }
+    return null;
+  }
+
+  function isIncludedInKit(productName, kitType) {
+    if (!kitType || !KIT_INCLUDES[kitType]) return false;
+    var name = (productName || '').toLowerCase();
+    var included = KIT_INCLUDES[kitType];
+    return included.some(function(term) { return name.includes(term); });
+  }
+
+  // Helper: extract brand from product name
+  function getBrand(name) {
+    name = (name || '').toLowerCase();
+    var brands = ['biobizz','canna','dutchpro','advanced nutrients','plagron','atami',
+                  'rhodos','hesi','aptus','athena','bionova','gen200','flower bomb',
+                  'dutch masters','garden highpro','platinum','sunpro','fortis','lumen king'];
+    for (var i = 0; i < brands.length; i++) {
+      if (name.includes(brands[i])) return brands[i];
+    }
+    return null;
+  }
+
+  // Helper: extract size/volume from name (1L, 5L, 250ml, 10kg etc)
+  function getSize(name) {
+    var m = (name || '').match(/(\d+[\.,]?\d*)\s*(l|ml|kg|g)/i);
+    return m ? m[0].toLowerCase().replace(',','.') : null;
+  }
+
+  // Helper: get base name without size (for size replacement detection)
+  function getBaseName(name) {
+    return (name || '').toLowerCase()
+      .replace(/\d+[\.,]?\d*\s*(l|ml|kg|g)/gi, '')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  // Step 0: detect if a COMPLETE KIT is being added → remove loose components it replaces
+  newProds.forEach(function(np) {
+    var kitType = getKitType(np.name);
+    if (kitType) {
+      // Remove any loose products that are included in this kit
+      offerteProds = offerteProds.filter(function(op) {
+        if (isIncludedInKit(op.name, kitType)) {
+          console.log('Kit replaces:', op.name);
+          return false; // remove
+        }
+        return true;
+      });
+    }
+  });
+
+  // Also: if loose components are added that conflict with an existing kit, warn but keep
+  // (user may be upgrading specific component)
+
+  // Step 1: detect brands being REPLACED
+  // If new products have brand X and current offer has brand X in same category → remove old brand X
+  var newBrandCats = {};
+  newProds.forEach(function(np) {
+    var brand = getBrand(np.name);
+    var cat = (np.category || '').toLowerCase();
+    if (brand) {
+      var key = brand + '::' + cat;
+      newBrandCats[key] = true;
+    }
+  });
+
+  // Find brands in current offer that conflict with new brands in same category
+  var toRemove = [];
+  offerteProds.forEach(function(op, idx) {
+    var brand = getBrand(op.name);
+    var cat = (op.category || '').toLowerCase();
+    if (!brand) return;
+
+    // Check if new products replace this brand in this category
+    var newKey = brand + '::' + cat;
+    if (newBrandCats[newKey]) {
+      // Same brand being updated - remove old, will add new
+      toRemove.push(idx);
+      return;
+    }
+
+    // Check if a DIFFERENT brand in same category is being added (brand swap)
+    var newBrandsInCat = newProds.filter(function(np) {
+      return (np.category || '').toLowerCase() === cat && getBrand(np.name) !== brand;
+    });
+    if (newBrandsInCat.length > 0) {
+      // Brand swap detected - remove old brand from this category
+      toRemove.push(idx);
+    }
+  });
+
+  // Step 2: detect size replacements (1L → 5L of hetzelfde product)
+  newProds.forEach(function(np) {
+    var newBase = getBaseName(np.name);
+    offerteProds.forEach(function(op, idx) {
+      if (toRemove.indexOf(idx) >= 0) return;
+      var oldBase = getBaseName(op.name);
+      // Same base name but different size = replacement
+      if (newBase === oldBase && np.name !== op.name) {
+        toRemove.push(idx);
+      }
+    });
+  });
+
+  // Remove old products (in reverse order to preserve indices)
+  toRemove = toRemove.filter(function(v, i, a) { return a.indexOf(v) === i; });
+  toRemove.sort(function(a, b) { return b - a; });
+  toRemove.forEach(function(idx) { offerteProds.splice(idx, 1); });
+
+  // Step 3: add/update new products
   newProds.forEach(function(np) {
     var existing = offerteProds.findIndex(function(op) {
       return op.name && np.name && op.name.toLowerCase() === np.name.toLowerCase();
     });
     if (existing >= 0) {
-      // Update existing product
       offerteProds[existing] = Object.assign(offerteProds[existing], np);
     } else {
-      // Add new product
       offerteProds.push(np);
     }
   });
+
   renderProducts(offerteProds, null);
 }
 
@@ -1307,7 +1431,13 @@ async function sendMessage() {
               emoji: item.emoji || ''
             };
           }).filter(function(item) {
-            // Only keep products with a valid URL - skip "recommendation" only items
+            if (item.remove === true) {
+              // Remove this product from offer
+              offerteProds = offerteProds.filter(function(op) {
+                return op.name && item.name && op.name.toLowerCase() !== item.name.toLowerCase();
+              });
+              return false;
+            }
             return item.url && item.url.includes('growdeal.nl') && item.name;
           });
           jsonData = p;
