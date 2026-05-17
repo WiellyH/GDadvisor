@@ -772,12 +772,12 @@ Wil je Flower Bomb erbij voor grotere toppen?
 
 REGELS voor vragen:
 - Begin elke keuzeregel ALTIJD met → (pijl naar rechts)
-- Stel MAXIMAAL 1 vraag per beurt — absoluut nooit meer dan 1
+- Stel maximaal 2 vragen tegelijk via keuze knoppen — de app wacht tot beide zijn beantwoord
 - Stuur altijd JSON bij elke vraag — ook al is de offerte nog niet compleet
 - Vraag nooit iets wat je al weet uit de context
-- Na 1-2 beantwoorde vragen: bouw al een complete offerte, verfijn daarna
+- Na alle vragen beantwoord: bouw complete offerte in 1 keer
 - Na offerte: hooguit 1 korte upsell vraag
-- NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
+- De antwoorden komen gecombineerd binnen als "antwoord1 | antwoord2" — verwerk ze allebei
 
 BELANGRIJK:
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
@@ -864,12 +864,12 @@ Wil je Flower Bomb erbij voor grotere toppen?
 
 REGELS voor vragen:
 - Begin elke keuzeregel ALTIJD met → (pijl naar rechts)
-- Stel MAXIMAAL 1 vraag per beurt — absoluut nooit meer dan 1
+- Stel maximaal 2 vragen tegelijk via keuze knoppen — de app wacht tot beide zijn beantwoord
 - Stuur altijd JSON bij elke vraag — ook al is de offerte nog niet compleet
 - Vraag nooit iets wat je al weet uit de context
-- Na 1-2 beantwoorde vragen: bouw al een complete offerte, verfijn daarna
+- Na alle vragen beantwoord: bouw complete offerte in 1 keer
 - Na offerte: hooguit 1 korte upsell vraag
-- NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
+- De antwoorden komen gecombineerd binnen als "antwoord1 | antwoord2" — verwerk ze allebei
 
 BELANGRIJK:
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
@@ -983,27 +983,65 @@ function addMsg(role, text) {
   msgEl.scrollTop = msgEl.scrollHeight;
 }
 
+// Pending answers for multi-question batching
+var pendingAnswers = [];
+var pendingTimer = null;
+
 function pickChoice(btn) {
   const isCustom = btn.dataset.custom === 'true';
   if (isCustom) {
-    // Focus input with placeholder hint
     inputEl.focus();
     inputEl.placeholder = 'Typ hier je antwoord en druk op Enter...';
     inputEl.style.borderColor = 'var(--green)';
     setTimeout(() => { inputEl.placeholder = 'Beschrijf je kweeksituatie of stel een vraag...'; inputEl.style.borderColor = ''; }, 8000);
-    // Scroll to input
     inputEl.scrollIntoView({behavior: 'smooth'});
     return;
   }
-  // Disable ALL choice groups in the conversation (prevent double answering)
-  document.querySelectorAll('.choice-btn').forEach(function(b) {
+
+  // Find which question group this button belongs to
+  var choicesDiv = btn.closest('.choices');
+  
+  // Disable this choice group only
+  choicesDiv.querySelectorAll('.choice-btn').forEach(function(b) {
     b.disabled = true; b.style.opacity = '0.4';
   });
-  // Highlight selected
   btn.style.opacity = '1'; btn.style.background = 'var(--green)'; btn.style.color = '#fff';
-  // Send as message
-  inputEl.value = btn.textContent;
-  sendMessage();
+
+  // Add answer to pending batch
+  pendingAnswers.push(btn.textContent.trim());
+
+  // Check how many unanswered choice groups remain in the last message
+  var lastMsg = document.querySelector('.msg.assistant:last-of-type');
+  var allGroups = lastMsg ? lastMsg.querySelectorAll('.choices') : [];
+  var unanswered = 0;
+  allGroups.forEach(function(g) {
+    var hasSelected = g.querySelector('.choice-btn[style*="rgb(30, 107, 60)"]') || 
+                      g.querySelector('.choice-btn[style*="#1e6b3c"]');
+    if (!hasSelected) unanswered++;
+  });
+
+  // Clear existing timer
+  if (pendingTimer) clearTimeout(pendingTimer);
+
+  if (unanswered === 0) {
+    // All questions answered - send combined message after short delay
+    pendingTimer = setTimeout(function() {
+      var combined = pendingAnswers.join(' | ');
+      pendingAnswers = [];
+      inputEl.value = combined;
+      sendMessage();
+    }, 400);
+  } else {
+    // Still more questions - wait 10s max before sending anyway
+    pendingTimer = setTimeout(function() {
+      if (pendingAnswers.length > 0) {
+        var combined = pendingAnswers.join(' | ');
+        pendingAnswers = [];
+        inputEl.value = combined;
+        sendMessage();
+      }
+    }, 10000);
+  }
 }
 
 const THINKING_MSGS = [
