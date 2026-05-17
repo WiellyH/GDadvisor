@@ -130,6 +130,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <div class="title">Jouw setup offerte</div>
       <div id="total-pill"></div>
     </div>
+    <div id="search-bar-top" style="padding:8px 14px;border-bottom:1px solid var(--border);background:var(--white)">
+      <div style="position:relative">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted)">🔍</span>
+        <input id="product-search-input" type="text" placeholder="Product zoeken en toevoegen aan offerte..." 
+          style="width:100%;box-sizing:border-box;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px 8px 32px;font-size:13.5px;font-family:inherit;outline:none;background:var(--bg)"
+          oninput="searchAndShow(this.value)"
+          onfocus="this.style.borderColor='var(--green)';document.getElementById('search-results-top').style.display='block'"
+          onblur="setTimeout(function(){document.getElementById('search-results-top').style.display='none'},200)">
+      </div>
+      <div id="search-results-top" style="display:none;max-height:260px;overflow-y:auto;margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
     <div id="seo-block" style="display:none">
       <div class="seo-label">SEO Pagina</div>
       <div id="seo-title"></div>
@@ -313,7 +324,12 @@ BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit d
 - Potten: Stoffen pot 11L (#1 bestseller, 1713x verkocht), 26L (#2)
 - Meting: Platinum pH meter (#1 verkocht, 270x)
 - Additieven: GEN200 Control 1L en Flower Bomb top omzet
-- Flower Bomb = PGR / hormonen bloeibooster — altijd aanbevelen als klant vraagt naar PGR, hormonen, groeiregulatoren, bloeibooster, zwaardere toppen
+- Flower Bomb = PGR bloeibooster van Field Marshal — EXACTE TOEPASSING:
+Dosering: kortbloeiend (7-9 wkn) = 1ml/L | langbloeiend (12-14 wkn) = 2ml/L
+Timing: SLECHTS 2 WEKEN totaal — bijv. week 3 EN week 7 van de bloei. NOOIT wekelijks!
+Meer is NIET beter — overdosering beschadigt plant
+Combineer met normale voeding + PK booster voor max effect (+70% gewicht)
+NOOIT bij: beginners, organisch, Monster Soil — alleen gevorderd/pro
 - Ventilatie: Can Lite Filter 150m³ meest verkocht filter
 - Accessoires: Clipfan 15cm, RVS Slangklemmen, Rope Ratchet PRO altijd meenemen
 
@@ -748,11 +764,13 @@ WANNEER MONSTER SOIL AUTOMATISCH TOEVOEGEN (zonder dat klant erom vraagt):
 → Klant kiest "weet ik nog niet" bij medium vraag
 → Klant vraagt om "organisch", "biologisch", "puur natuur", "natural" — Monster Soil is 100% organisch
 → Klant vraagt om "pgr", "hormonen", "plant growth regulator", "bloeibooster" → Flower Bomb is de PGR-booster van GrowDeal
+→ NOOIT Flower Bomb aanbevelen bij: beginners, eerste keer kweken, organisch, Monster Soil gebruikers — dit is pro-product
 → Klant heeft <6 planten EN is beginner
 → Voordeel altijd benoemen: "Alleen water geven, geen voeding, geen pH gedoe — ideaal voor je eerste grow"
 → Bij organisch: "Monster Soil is 100% organisch — geen kunstmest, alleen water toevoegen"
 → Na Monster Soil: GEEN aparte voedingslijn toevoegen (zit al in de soil)
-→ WEL toevoegen: Flower Bomb in de bloeifase (werkt perfect samen met Monster Soil)
+→ GEEN Flower Bomb bij beginners of organisch — dit is voor professionals
+→ Wel aanraden bij gevorderd/pro: Flower Bomb in de bloeifase
 
 HPS SETUPS — altijd als complete kit aanbevelen:
 Een HPS setup bestaat ALTIJD uit 3 onderdelen samen — nooit alleen een lamp aanbieden:
@@ -1562,7 +1580,7 @@ function closeSearchPanel() {
 }
 
 function searchAndShow(query) {
-  var resultsEl = document.getElementById('search-results');
+  var resultsEl = document.getElementById('search-results-top') || document.getElementById('search-results');
   if (!query || query.length < 2) { resultsEl.innerHTML = ''; return; }
   var results = searchProducts(query, 12);
   resultsEl.innerHTML = '';
