@@ -1170,7 +1170,7 @@ function renderProducts(products, seo) {
   pill.textContent = fmt; pill.style.display = 'inline-block';
 }
 
-function mergeProducts(newProds) {
+function mergeProducts(newProds, addOnly) {
   if (!newProds || !newProds.length) return;
 
   // Kit definitions - what each complete kit INCLUDES (so we can remove duplicates)
