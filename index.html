@@ -1363,7 +1363,7 @@ function removeTyping() {
   const t = document.getElementById('typing'); if(t) t.remove();
 }
 
-function parsePrice(s) { return parseFloat((s||'').replace(/[^0-9.,]/g,'').replace(',','.')) || 0; }
+function parsePrice(s) { return (parseFloat((s||'').replace(/[^0-9.,]/g,'').replace(',','.')) || 0) * 1.21; }
 
 function getEmoji(cat) {
   const c = (cat||'').toLowerCase();
@@ -1656,7 +1656,7 @@ function changeQty(btn, delta) {
     if (changedQty.length > 10) changedQty.shift();
   }
   
-  const unit = parseFloat(priceEl.dataset.unit);
+  const unit = parseFloat(priceEl.dataset.unit) * 1.21;
   priceEl.textContent = '€' + (unit * qty).toFixed(2);
   const total = offerteProds.reduce((s,p) => s + parsePrice(p.price) * (p.qty||1), 0);
   document.getElementById('total-price').textContent = '€' + total.toFixed(0);
