@@ -394,6 +394,9 @@ VERPLICHT FORMAAT — ALTIJD exact zo:
 
 DE TAGS ZIJN: <<<JSON>>> en <<<ENDJSON>>> — drie kleiner-dan tekens, dan JSON of ENDJSON, dan drie groter-dan tekens.
 NOOIT: <<>>, backtick-json, <JSON>, [JSON] of andere varianten. ALLEEN <<<JSON>>> en <<<ENDJSON>>>.
+COMPACT JSON — gebruik GEEN spaties/enters in JSON, alles op 1 regel per product:
+{"products":[{"name":"...","price":"€x","category":"...","reason":"kort","url":"https://...","img":"https://...","qty":1},{"name":"..."}]}
+Reason max 8 woorden. Geen lege velden. Dit voorkomt dat JSON wordt afgekapt.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
@@ -527,6 +530,26 @@ REGELS:
 - Bij grote ruimte (>4m²): bereken ALTIJD aantal lampen via grid, nooit minder dan logisch
 - Bij "losse driver" vraag: Spektra Master 720W of BYD 720W aanbevelen
 - Bij HPS: altijd complete kit aanbevelen (ballast + reflector + lamp) — nooit alleen de lamp
+CIRCULATIEVENTILATIE — clipfan vs wandventilator:
+Kleine tent (tot 2.4×2.4m / 6m²): Clipfan 15cm aan tent stang
+Grote ruimte (≥2.4×2.4m of >6m²): Wandventilator of 3-in-1 — meer bereik, beter voor grote ruimtes
+
+PRODUCTEN CIRCULATIE (exacte URLs):
+- Clipfan 15cm | €11.88 | https://www.growdeal.nl/clipfan-15cm/ — tenten tot 120×120cm: 1 stuk, tot 240×240cm: 2-4 stuks
+- Wandventilator DM 40cm met bediening | €28.39 | https://www.growdeal.nl/wandventilator-met-bediening-dm-40-cm/ — ruimtes 4-15m²
+- Wandventilator Ø40cm trektouw 2 stuks | €30.98 | https://www.growdeal.nl/wandventilator-o40cm-met-trektouw-2-stuks/ — set van 2 voor 8-20m²
+- Dutch Masters 3-in-1 Ø45cm | €35.64 | https://www.growdeal.nl/dutch-masters-industriele-ventilator-3-in-1-45cm/ — wand/vloer/staand, >10m²
+- Dutch Masters 3-in-1 Ø45cm 2 stuks | €56.66 | https://www.growdeal.nl/dutch-masters-industriele-ventilator-3-in-1-45cm-2-stuks-in-doos/ — professioneel, >20m²
+- Vloerventilator Ø40cm | €29.50 | https://www.growdeal.nl/dutch-masters-vloer-ventilator-o40cm/ — warmteafvoer bij HPS
+
+RICHTLIJN PER RUIMTE:
+- 80×80, 100×100, 120×120cm tent → 1-2 clipfans
+- 150×150, 240×120cm tent → 2-4 clipfans of 1 wandventilator
+- 240×240cm en groter → wandventilator(s) ipv clipfan
+- 3×6m (18m²) → 2 wandventilatoren (1 per zijde) + evt. vloerventilator bij HPS
+- Per ~10-15m² reken 1 wandventilator
+- Montage op ~1.5m hoogte, schuin omlaag op planten gericht
+
 - Bij VENTILATIE: altijd als complete set — ONDERDELEN MOETEN ZELFDE DIAMETER HEBBEN:
 
 100mm SET: Centro PL-100 (290m³) €44.15 + Can Lite 100/125Ø €22.11 + Combiconnect 102mm €11.04 + Slangklem 60-110mm €0.90 qty:3
@@ -1784,7 +1807,7 @@ async function sendMessage() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 1500,
+        max_tokens: 2500,
         system: getSystem(text),
         messages: (function() {
           var msgs = history.slice(-8);
@@ -1958,7 +1981,23 @@ async function sendMessage() {
             });
             jsonData = p;
           }
-        } catch(e2) { console.error('JSON parse failed:', e2.message, rawCand ? rawCand.slice(0,300) : 'no candidate'); }
+        } catch(e2) {
+        // Try to recover truncated JSON by finding last complete product
+        try {
+          var trunc = rawCand ? rawCand.trim() : '';
+          var lastGood = Math.max(trunc.lastIndexOf('},'), trunc.lastIndexOf('}]'));
+          if (lastGood > 50) {
+            trunc = trunc.slice(0, lastGood + 1);
+            if (trunc.indexOf('[') > trunc.indexOf(']')) trunc += ']';
+            if (trunc.split('{').length > trunc.split('}').length) trunc += '}';
+            var p3 = JSON.parse(trunc);
+            var prods3 = normalizeProducts(p3);
+            if (prods3 && prods3.length) {
+              jsonData = {products: prods3.map(function(i){ return {name:i.name||'',price:i.price||'',category:i.category||'',reason:i.reason||'',url:i.url||'',img:i.img||'',id:0,qty:i.qty||1,inStock:true,emoji:''}; }).filter(function(i){ return i.url && i.url.includes('growdeal.nl') && i.name; })};
+            }
+          }
+        } catch(e3) { console.error('JSON recovery failed:', e2.message); }
+      }
       }
     }
     
