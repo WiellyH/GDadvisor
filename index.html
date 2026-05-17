@@ -250,6 +250,7 @@ VERPLICHT FORMAAT — elk antwoord ziet er zo uit:
 [Korte tekst, max 60 woorden, geen bullets]
 <<<JSON>>>
 {
+  (gebruik EXACT deze tag, 3 < tekens aan elke kant)
   "products": [
     {
       "name": "Productnaam exact uit catalogus",
@@ -558,6 +559,23 @@ Alleen losse lamp aanbevelen als klant expliciet vraagt om vervanglamp.
 LICHT BEREKENING — praktisch en realistisch:
 
 TENT MATEN — adviseer ook als niet op voorraad, vermeld dan levertijd:
+Dutch Masters PRO 240×240cm (€425) is WEL op voorraad — gebruik deze voor 240×240 setups!
+Garden HighPro Basic 240×240cm (€270) ook op voorraad — budget optie voor 240×240.
+
+MAATNOTATIES — klanten schrijven dit op allerlei manieren, jij begrijpt ze allemaal:
+2,4x2,4 = 240×240cm tent
+2.4x2.4 = 240×240cm tent  
+2,5 bij 2,5 = dichtstbijzijnde = 240×240 of 300×300
+1,2 bij 2,4 = 120×240cm tent
+1,5x1,5 = 150×150cm tent
+1,2x1,2 = 120×120cm tent
+3 bij 6 = 3×6m ruimte (geen standaard tent, bouw zelf of PRO 300×300)
+4 bij 4 = 4×4m (geen standaard tent — PRO 400×400 of zelf bouwen)
+"een 2 bij 2" = 200×200 → dichtstbijzijnde is 240×240
+"klein tentje" = 60×60 of 80×80
+"grote ruimte" = vraag naar exacte maat
+
+Altijd de dichtstbijzijnde beschikbare tent aanbevelen en uitleggen waarom.
 Beschikbare maten: 40×40, 60×60, 80×80, 100×100, 120×120, 150×150, 240×120, 240×240, 300×300cm
 ECO lijn (budget) en PRO lijn (steviger) beschikbaar in de meeste maten.
 
@@ -788,8 +806,8 @@ const inputEl = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
 const CTX_RE = [
-  {re:/\b(40[×x]40|60[×x]60|80[×x]80|100[×x]100|120[×x]120|150[×x]150|240[×x]240|240[×x]120)\b/i, key:'📐 ruimte'},
-  {re:/\b(\d+)\s*[×xX]\s*(\d+)\s*m\b/i, key:'📐 ruimte', fmt:m=>m[1]+'×'+m[2]+'m'},
+  {re:/\b(40[×x,.]40|60[×x,.]60|80[×x,.]80|100[×x,.]100|120[×x,.]120|150[×x,.]150|240[×x,.]240|240[×x,.]120|300[×x,.]300)\b/i, key:'📐 ruimte'},
+  {re:/\b(\d+)[×x,.\s]+(\d+)\s*m\b/i, key:'📐 ruimte', fmt:m=>m[1]+'×'+m[2]+'m'},
   {re:/\b(LED|HPS|CMH|LEC)\b/i, key:'💡 licht'},
   {re:/€\s*(\d[\d.]*)/i, key:'💶 budget', fmt:m=>'€'+m[1]},
   {re:/\b(aarde|coco|hydro)\b/i, key:'🌱 medium'},
@@ -1164,11 +1182,12 @@ async function sendMessage() {
     let jsonData = null;
     // ALWAYS strip JSON blocks from chat text first
     let chatText = raw
+      .replace(/<<+JSON>>+[\s\S]*?<<+ENDJSON>>+/g, '')
       .replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g, '')
       .replace(/```json[\s\S]*?```/g, '')
       .replace(/```[\s\S]*?```/g, '')
       .trim();
-    const tagMatch = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
+    const tagMatch = raw.match(/<<+JSON>>+([\s\S]*?)<<+ENDJSON>>+/) || raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
     const tickMatch = raw.match(/```json([\s\S]*?)```/);
     const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : null;
     if (rawCand) {
