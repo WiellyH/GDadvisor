@@ -199,7 +199,9 @@ function buildContextCatalog(query) {
     {terms: ['clipfan','slangklem','ratchet','rope','ophang'], max: 3},
     {terms: ['gen200','flower bomb','calmag'], max: 3},
     {terms: ['rhodos'], max: 3},
-    {terms: ['coco','substraat','aarde','soil'], max: 2},
+    {terms: ['coco','substraat','aarde','soil','all-mix','light-mix'], max: 3},
+    {terms: ['monster soil','homegrow'], max: 2},
+    {terms: ['complete kweektent','complete kweekset'], max: 3},
   ];
   
   var allResults = [];
@@ -283,10 +285,11 @@ BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit d
 CORRECTE PRODUCTNAMEN — gebruik EXACT deze namen, nooit iets verzinnen:
 Coco substraat heet: "Canna Coco Professional Plus" of zoek op "coco substraat" — NIET Rhodos.
 Rhodos is een COMPLETE VOEDINGSLIJN (geen substraat!) met vaste verhouding:
-- Rhodos Base 4 delen (basisbemesting)
-- Rhodos Grow 2 delen (groeifase)  
-- Rhodos Bloom 6 delen (bloeifase)
-Altijd alle 3 samen aanbevelen als klant Rhodos kiest. Goede keuze voor professionele growers.
+- Rhodos Base 4 delen | URL: https://www.growdeal.nl/rhodos-base-10-kg/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8GENR30010-Rhodos-Base-10-kg.jpg
+- Rhodos Grow 2 delen | URL: https://www.growdeal.nl/rhodos-grow-10-kg/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8GENR60010-Rhodos-Grow-10-kg.jpg
+- Rhodos Bloom 6 delen | URL: https://www.growdeal.nl/rhodos-bloom-10-kg/ | IMG: https://www.growdeal.nl/wp-content/uploads/2024/10/C8GENR90010-Rhodos-Bloom-10-kg.jpg
+ALTIJD alle 3 samen aanbevelen. NOOIT Rhodos Base gebruiken als vervanging voor Grow of Bloom.
+Kleinere maten ook beschikbaar: 2,5kg en 5kg versies op growdeal.nl/rhodos-[base/grow/bloom]-[25/5]-kg/
 DutchPro voeding heet: "DutchPro Grow Hydro/Coco A & B" en "DutchPro Bloom Hydro/Coco A & B" (voor coco)
 DutchPro voeding heet: "DutchPro Grow Soil A & B" en "DutchPro Bloom Soil A & B" (voor aarde)
 DutchPro heeft GEEN product dat "Base" heet — dit bestaat niet
@@ -331,11 +334,43 @@ ALTIJD:
 - Sluit af met iets menselijks: "Nog vragen? Ik ben er" of "Succes met de grow! 🌿"
 - Gebruik spaarzaam emoji's — 1 of 2 per bericht max, nooit overdrijven
 
+KLANT PROFILING — eerste vraag bepaalt je aanpak:
+BIJ KLEINE HOMEGROWER (1-6 planten, kleine tent, beginner, thuiskweek):
+→ Stel DIRECT een complete kit voor zonder veel vragen
+→ Voeg alleen voeding toe als vraag
+→ Bied Monster Soil Homegrow Pot aan als alternatief (geen voeding nodig)
+→ Voorbeeld trigger: "3 plantjes", "klein tentje", "beginnen met kweken", "thuis kweken"
+
+BIJ PRO/GROTE RUIMTE (>150cm tent, meerdere lampen, professioneel):
+→ Stel EERST de juiste vragen voordat je een offerte maakt
+→ Vraag: "Wil je dat ik je adviseer, of weet je al wat je nodig hebt en vertel je het me?"
+→ Peilen: hoeveel lampen? Welk medium? Bestaande installatie?
+→ Voorbeeld trigger: "3x6m", "10 lampen", "commercieel", "professionele ruimte"
+
+ALTIJD BIJ TENT SET / COMPLETE SET / KIT vragen:
+Standaard complete tent set bevat ALTIJD:
+1. Tent (of complete kit als klein)
+2. Lamp (LED kit of HPS kit = ballast+reflector+lamp)
+3. Afzuiger + koolstoffilter + combiconnect slang + slangklemmen (qty:3)
+4. Clipfan (interne circulatie)
+5. Rope Ratchets (qty:2, voor ophangen lamp)
+6. Potten (stoffen potten) + substraat (BioBizz All-Mix 20L of Monster Soil)
+7. Thermo-hygrometer
+8. pH meter + EC meter
+9. Timer/schakelklok
+10. GEN200 Control
+
 REGELS:
 - TENT ALTIJD EERSTE in de offerte — nooit weglaten, ook niet bij grote setups
 - Bij grote ruimte (>4m²): bereken ALTIJD aantal lampen via grid, nooit minder dan logisch
 - Bij "losse driver" vraag: Spektra Master 720W of BYD 720W aanbevelen
 - Bij HPS: altijd complete kit aanbevelen (ballast + reflector + lamp) — nooit alleen de lamp
+- Bij VENTILATIE: altijd als complete set aanbevelen:
+  1. Afzuiger (buisventilator)
+  2. Koolstoffilter (passend bij diameter afzuiger)
+  3. Combiconnect luchtslang (zelfde diameter, 102mm voor 100mm, 127mm voor 125mm, 160mm voor 150mm)
+  4. RVS Slangklemmen (qty:3) voor luchtdichte verbinding
+  NOOIT alleen een afzuiger aanbevelen zonder filter en slang!
 - Bij HPS: altijd één maat zwaardere ventilatie + waarschuwing warmte
 - Bij beginner + hydro: adviseer te heroverwegen, stel aarde voor
 - Altijd motiveren waarom elk product past bij dit specifieke profiel
@@ -542,11 +577,24 @@ VEELVOORKOMENDE PROBLEMEN:
 - Internervenale vergeling (gele bladeren met groene nerven) → Ca/Mg gebrek → BioBizz CalMag
 - Punten verbranden bij voldoende afstand → voedingstoxiciteit → spoel + verlaag EC
 
-COMPLETE TENT KITS — altijd eerste aanbieden als iemand om een complete setup vraagt:
-GrowDeal.nl verkoopt kant-en-klare complete kweeksets — dit zijn de beste aanbeveling voor beginners.
-Bij vragen als "complete setup", "alles in één", "starter kit", "complete tent" → ALTIJD eerst complete kit tonen.
-Complete kits bevatten al: tent + lamp + ventilatie + filter + accessoires
-Zoek in de productcatalogus op "complete kweektent" of "complete set" voor actuele producten en prijzen.
+COMPLETE TENT KITS — beschikbare kant-en-klare sets (altijd eerst aanbieden voor kleine setups):
+- Garden Highpro Complete 60×60cm 60W LED | €194.25 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-60x60cm-60w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+- Garden Highpro Complete 80×80cm 150W LED | €253.05 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-80x80cm-150w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+- Complete Kweektent 80x80x180cm 180W LED PRO | €315.00 | URL: https://www.growdeal.nl/complete-kweektent-80x80x180cm-180w-led-pro/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/09/complete-kweektent-80x80x180cm.jpg
+- Garden Highpro Complete 120×60cm 300W LED | €371.70 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-120x60cm-300w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+
+Bij kleine homegrow (1-4 planten, <120×120cm): ALTIJD eerst complete kit aanbevelen + alleen voeding toevoegen.
+Bij grotere setup (>150cm of professioneel): losse componenten samenstellen.
+
+HPS 600W KIT — altijd alle 3 samen (nooit alleen lamp):
+1. Ballast | Platinum Electronische VSA 600W | €43.50 | URL: https://www.growdeal.nl/platinum-electronische-vsa-600w-dimbaar/
+2. Reflector | Platinum Wing Reflector 55x60cm | €22.53 | URL: https://www.growdeal.nl/platinum-wing-reflector-55-x-60cm-met-spreider/
+3. Lamp | Horti Sun PRO HPS 600W | €8.19 | URL: https://www.growdeal.nl/horti-sun-power-pro-hps-600w-230v-e40/
+Bij HPS: voeg ook altijd toe: cooltube of wing reflector + één maat zwaardere ventilatie dan bij LED.
+
+MONSTER SOIL HOMEGROW POT — altijd aanbieden als alternatief bij kleine setups (1-6 planten):
+Monster Soil Homegrow Pot 11L | €33.57 | kant-en-klaar substraat, alleen water toevoegen, geen voeding nodig
+URL: https://www.growdeal.nl/monster-soil-homegrow-pot-11l/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/C8SUB1200-Monster-Soil-Homegrow-Pot-_-11L.png
 
 HPS SETUPS — altijd als complete kit aanbevelen:
 Een HPS setup bestaat ALTIJD uit 3 onderdelen samen — nooit alleen een lamp aanbieden:
@@ -1164,17 +1212,21 @@ async function sendMessage() {
       removeTyping();
       const isRate = data.error.message && (data.error.message.includes('rate limit') || data.error.message.includes('overload'));
       if (isRate) {
-        // Auto-retry after 3 seconds
-        addMsg('assistant', '⚠️ Even te druk! Probeer het nog een keer 🌱');
+        // Remove last user message from history so retry works cleanly
+        if (history.length > 0 && history[history.length-1].role === 'user') {
+          const lastMsg = history.pop();
+          // Put it back in the input so user can easily resend
+          inputEl.value = lastMsg.content;
+        }
+        addMsg('assistant', '⚠️ Even te druk — ik ben heel populair vandaag! Druk op ↑ om het opnieuw te proberen 🌱');
         sendBtn.disabled = false;
-        // Re-enable input and suggest retry
-        inputEl.placeholder = 'Stuur je bericht opnieuw...';
-        setTimeout(() => { inputEl.placeholder = 'Beschrijf je kweeksituatie of stel een vraag...'; }, 5000);
+        inputEl.focus();
+        inputEl.select();
       } else {
         addMsg('assistant', '⚠️ Er ging iets mis. Probeer opnieuw.');
+        sendBtn.disabled = false;
+        inputEl.focus();
       }
-      sendBtn.disabled = false;
-      inputEl.focus();
       return;
     }
     
