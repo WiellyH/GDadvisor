@@ -1106,6 +1106,10 @@ REGELS voor vragen:
 - De antwoorden komen gecombineerd binnen als "antwoord1 | antwoord2" — verwerk ze allebei
 
 BELANGRIJK:
+- Bij VERVANGING (bijv. "vervang X door Y", "goedkoopste", "andere optie"): 
+  stuur het nieuwe product MET "replaces":"naam van te verwijderen product"
+  Voorbeeld: {"name":"Platinum pH meter","replaces":"Aqua Master P50"}
+  De app verwijdert dan het genoemde product automatisch
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
 - Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
 - Bij TOEVOEGING: stuur alleen de toe te voegen producten
@@ -1198,6 +1202,10 @@ REGELS voor vragen:
 - De antwoorden komen gecombineerd binnen als "antwoord1 | antwoord2" — verwerk ze allebei
 
 BELANGRIJK:
+- Bij VERVANGING (bijv. "vervang X door Y", "goedkoopste", "andere optie"): 
+  stuur het nieuwe product MET "replaces":"naam van te verwijderen product"
+  Voorbeeld: {"name":"Platinum pH meter","replaces":"Aqua Master P50"}
+  De app verwijdert dan het genoemde product automatisch
 - Bij VERVANGING merk (bijv. "vervang biobizz door canna"): stuur alleen de nieuwe Canna producten — biobizz wordt automatisch verwijderd
 - Bij VERVANGING verpakking (bijv. "1L naar 5L"): stuur het nieuwe 5L product — de 1L wordt automatisch verwijderd
 - Bij TOEVOEGING: stuur alleen de toe te voegen producten
@@ -1523,6 +1531,7 @@ function mergeProducts(newProds, addOnly) {
     name = (name || '').toLowerCase();
     var brands = ['biobizz','canna','dutchpro','advanced nutrients','plagron','atami',
                   'rhodos','hesi','aptus','athena','bionova','gen200','flower bomb',
+                  'aqua master','aquamaster','bluelab',
                   'dutch masters','garden highpro','platinum','sunpro','fortis','lumen king'];
     for (var i = 0; i < brands.length; i++) {
       if (name.includes(brands[i])) return brands[i];
@@ -1577,6 +1586,33 @@ function mergeProducts(newProds, addOnly) {
 
   // Also: if loose components are added that conflict with an existing kit, warn but keep
   // (user may be upgrading specific component)
+
+  // Step 0b: detect CATEGORY replacements for exclusive categories
+  // (meter, lamp, tent, ballast, reflector, substraat - only 1 per setup)
+  var exclusiveCats = ['meting','meter','meetapparatuur','ph meter','ec meter',
+                       'tent','kweektent','growbox',
+                       'substraat','medium','coco','aarde',
+                       'controller','klimaatregelaar',
+                       'complete kit','complete kits'];
+  
+  newProds.forEach(function(np) {
+    var newCat = (np.category || '').toLowerCase();
+    var isExclusive = exclusiveCats.some(function(ec) { return newCat.includes(ec); });
+    if (!isExclusive) return;
+    
+    // Remove existing products in the same exclusive category
+    offerteProds = offerteProds.filter(function(op) {
+      var opCat = (op.category || '').toLowerCase();
+      var sameExclusiveCat = exclusiveCats.some(function(ec) {
+        return newCat.includes(ec) && opCat.includes(ec);
+      });
+      if (sameExclusiveCat && op.name !== np.name) {
+        console.log('Category replace:', op.name, '->', np.name);
+        return false;
+      }
+      return true;
+    });
+  });
 
   // Step 1: detect brands being REPLACED
   // If new products have brand X and current offer has brand X in same category → remove old brand X
@@ -2005,12 +2041,19 @@ async function sendMessage() {
           }).filter(function(item) {
             if (item.remove === true) {
               var removeName = (item.name || '').toLowerCase();
-              // Match on full name OR partial name (first 20 chars)
               offerteProds = offerteProds.filter(function(op) {
                 var opName = (op.name || '').toLowerCase();
                 return !opName.includes(removeName.slice(0,20)) && !removeName.includes(opName.slice(0,20));
               });
               return false;
+            }
+            // Handle "replaces" field - remove named product
+            if (item.replaces) {
+              var replacesName = (item.replaces || '').toLowerCase();
+              offerteProds = offerteProds.filter(function(op) {
+                var opName = (op.name || '').toLowerCase();
+                return !opName.includes(replacesName.slice(0,15)) && !replacesName.includes(opName.slice(0,15));
+              });
             }
             return item.url && item.url.includes('growdeal.nl') && item.name;
           });
