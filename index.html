@@ -231,11 +231,33 @@ TOON: Vriendelijk, deskundig, praktisch. Niet te formeel. Geen harde verkooptaal
 TAAL: Altijd in de taal van de gebruiker. Standaard Nederlands.
 LENGTE chat: Max 100 woorden. Bondig en to-the-point.
 
-KERNFUNCTIE: Bij ELKE vraag over een setup geef je DIRECT en METEEN een JSON-blok terug.
-NOOIT zeggen "Ik zet dit voor je klaar" zonder DIRECT daarna de JSON te sturen.
-NOOIT een bericht sturen zonder JSON als het over producten gaat.
-ALTIJD in hetzelfde bericht: chat tekst + JSON blok. Geen uitzonderingen.
-Als je 10 lampen noemt in de tekst, moeten er 10 lampen in de JSON staan met qty:10.
+KERNFUNCTIE — IJZEREN REGELS:
+1. Bij ELKE vraag over setup/producten: DIRECT een JSON-blok sturen in HETZELFDE bericht
+2. NOOIT aankondigen wat je gaat doen — gewoon doen
+3. NOOIT "Ik zet een lijst klaar" zonder die lijst er DIRECT bij te sturen
+4. Ook als je een vraag stelt: stuur een GEDEELTELIJKE offerte + 1 vraag
+5. Als je 10 lampen noemt: qty:10 in JSON. Altijd consistent.
+
+VERPLICHT FORMAAT — elk antwoord ziet er zo uit:
+[Korte tekst, max 60 woorden, geen bullets]
+<<<JSON>>>
+{
+  "products": [
+    {
+      "name": "Productnaam exact uit catalogus",
+      "price": "€xx.xx",
+      "category": "Categorie",
+      "reason": "Waarom dit product",
+      "url": "https://www.growdeal.nl/slug/",
+      "img": "https://www.growdeal.nl/wp-content/...",
+      "qty": 1
+    }
+  ]
+}
+<<<ENDJSON>>>
+[Optioneel: 1 vervolgvraag met → keuzes]
+
+KRITISCH: geen tekst, backticks of uitleg BINNEN de <<<JSON>>> tags. Puur geldige JSON.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
@@ -1098,7 +1120,7 @@ async function sendMessage() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 2000,
+        max_tokens: 1500,
         system: getSystem(text),
         messages: history.slice(-8)
       })
@@ -1108,8 +1130,17 @@ async function sendMessage() {
     const raw = data.content?.find(b=>b.type==='text')?.text || '';
     if (!raw && data.error) {
       removeTyping();
-      const isRate = data.error.message && data.error.message.includes('rate limit');
-      addMsg('assistant', isRate ? '🌱 Even wachten — ik ben momenteel heel populair! Probeer het over een paar seconden opnieuw.' : '⚠️ Er ging iets mis. Probeer opnieuw.');
+      const isRate = data.error.message && (data.error.message.includes('rate limit') || data.error.message.includes('overload'));
+      if (isRate) {
+        // Auto-retry after 3 seconds
+        addMsg('assistant', '⚠️ Even te druk! Probeer het nog een keer 🌱');
+        sendBtn.disabled = false;
+        // Re-enable input and suggest retry
+        inputEl.placeholder = 'Stuur je bericht opnieuw...';
+        setTimeout(() => { inputEl.placeholder = 'Beschrijf je kweeksituatie of stel een vraag...'; }, 5000);
+      } else {
+        addMsg('assistant', '⚠️ Er ging iets mis. Probeer opnieuw.');
+      }
       sendBtn.disabled = false;
       inputEl.focus();
       return;
