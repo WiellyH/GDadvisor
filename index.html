@@ -173,8 +173,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <button class="chip" onclick="sendChip(this)">HPS en LED vergelijken</button>
     </div>
     <div id="input-area">
+      <label title="Foto van plant uploaden voor diagnose" style="cursor:pointer;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);flex-shrink:0;font-size:18px">
+        📷<input type="file" id="plant-img-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+      </label>
       <textarea id="user-input" placeholder="Beschrijf je kweeksituatie of stel een vraag..." rows="1"></textarea>
       <button id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <div id="img-preview-bar" style="display:none;padding:6px 14px;background:var(--white);border-top:1px solid var(--border);align-items:center;gap:8px">
+      <img id="img-preview" style="height:48px;width:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">
+      <div style="flex:1;font-size:13px;color:var(--muted)">📷 Foto klaar — stuur direct of typ eerst je vraag</div>
+      <button onclick="clearImage()" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted)">✕</button>
     </div>
   </div>
 </div>
@@ -304,7 +312,13 @@ KERNFUNCTIE — IJZEREN REGELS:
 3. NOOIT "Ik zet een lijst klaar" zonder die lijst er DIRECT bij te sturen
 4. Ook als je een vraag stelt: stuur een GEDEELTELIJKE offerte + 1 vraag
 5. Als je 10 lampen noemt: qty:10 in JSON. Altijd consistent.
-6. NOOIT VERZINNEN — als je iets niet zeker weet, zeg je dat eerlijk:
+6. NOOIT VERZINNEN
+7. PLANT DIAGNOSE — als een foto is meegezonden:
+   - Analyseer kleur, vorm, vlekken, structuur van de bladeren
+   - Herken veelvoorkomende problemen: gebreksziekten, overwatering, pH-problemen, plagen, schimmel
+   - Geef directe diagnose + oorzaak + oplossing
+   - Adviseer concrete producten van growdeal.nl die helpen
+   - Veelvoorkomend: gele bladeren (N-gebrek, overwatering, pH), bruine punten (hittestress, wind, Ca-gebrek), paarse bladeren (P-gebrek), witte vlekken (meeldauw, spintmijt), bruine plekken (bacterie, schimmel) — als je iets niet zeker weet, zeg je dat eerlijk:
    - Productnamen, URLs, prijzen: ALLEEN uit de BESCHIKBARE PRODUCTEN lijst
    - Doseringen: alleen wat je zeker weet. Zeg "check de verpakking of growdeal.nl voor exacte dosering" als je twijfelt
    - Kweekadvies: geef je best bekende antwoord + "check cnnbs.nl voor meer details"
@@ -1114,7 +1128,7 @@ function getSystem(query) {
   return SYSTEM.replace('{CONTEXT}', ctxStr) + prefContext + dynamicCatalog;
 }
 
-function addMsg(role, text) {
+function addMsg(role, text, imgType, imgBase64) {
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   let content = '';
@@ -1651,6 +1665,38 @@ function addSearchResult(url, img, name, price) {
   closeSearchPanel();
 }
 
+var pendingImageBase64 = null;
+var pendingImageType = null;
+
+function handleImageUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    pendingImageBase64 = dataUrl.split(',')[1];
+    pendingImageType = file.type || 'image/jpeg';
+    
+    // Show preview
+    document.getElementById('img-preview').src = dataUrl;
+    document.getElementById('img-preview-bar').style.display = 'flex';
+    
+    // Auto-focus input with hint
+    inputEl.focus();
+    inputEl.placeholder = 'Stel een vraag over je plant of stuur direct voor diagnose...';
+    setTimeout(function() { inputEl.placeholder = 'Beschrijf je kweeksituatie of stel een vraag...'; }, 8000);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = ''; // Reset so same file can be uploaded again
+}
+
+function clearImage() {
+  pendingImageBase64 = null;
+  pendingImageType = null;
+  document.getElementById('img-preview-bar').style.display = 'none';
+}
+
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text) return;
@@ -1670,7 +1716,33 @@ async function sendMessage() {
         model: 'claude-sonnet-4-5',
         max_tokens: 1500,
         system: getSystem(text),
-        messages: history.slice(-8)
+        messages: (function() {
+          var msgs = history.slice(-8);
+          // If there's a pending image, attach it to the last user message
+          if (pendingImageBase64 && msgs.length > 0) {
+            var lastMsg = msgs[msgs.length - 1];
+            if (lastMsg.role === 'user') {
+              msgs = msgs.slice(0, -1).concat([{
+                role: 'user',
+                content: [
+                  {
+                    type: 'image',
+                    source: {
+                      type: 'base64',
+                      media_type: pendingImageType,
+                      data: pendingImageBase64
+                    }
+                  },
+                  {
+                    type: 'text',
+                    text: lastMsg.content
+                  }
+                ]
+              }]);
+            }
+          }
+          return msgs;
+        })()
       })
     });
     const data = await res.json();
