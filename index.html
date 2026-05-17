@@ -577,14 +577,21 @@ VEELVOORKOMENDE PROBLEMEN:
 - Internervenale vergeling (gele bladeren met groene nerven) → Ca/Mg gebrek → BioBizz CalMag
 - Punten verbranden bij voldoende afstand → voedingstoxiciteit → spoel + verlaag EC
 
-COMPLETE TENT KITS — beschikbare kant-en-klare sets (altijd eerst aanbieden voor kleine setups):
-- Garden Highpro Complete 60×60cm 60W LED | €194.25 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-60x60cm-60w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
-- Garden Highpro Complete 80×80cm 150W LED | €253.05 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-80x80cm-150w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
-- Complete Kweektent 80x80x180cm 180W LED PRO | €315.00 | URL: https://www.growdeal.nl/complete-kweektent-80x80x180cm-180w-led-pro/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/09/complete-kweektent-80x80x180cm.jpg
-- Garden Highpro Complete 120×60cm 300W LED | €371.70 | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-120x60cm-300w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+COMPLETE TENT KITS — kant-en-klare sets, ALLES AL INBEGREPEN:
 
-Bij kleine homegrow (1-4 planten, <120×120cm): ALTIJD eerst complete kit aanbevelen + alleen voeding toevoegen.
-Bij grotere setup (>150cm of professioneel): losse componenten samenstellen.
+GARDEN HIGHPRO kits bevatten: tent + LED lamp + koolstoffilter + afzuiger + clipfans + stoffen potten + timers + thermo-hygrometer. Klant hoeft ALLEEN voeding nog toe te voegen!
+- Garden Highpro Complete 60×60cm 60W LED | €194.25 | Alles inbegrepen behalve voeding | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-60x60cm-60w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+- Garden Highpro Complete 80×80cm 150W LED | €253.05 | Tent+LED+filter+afzuiger+2 clipfans+potten+timer+hygrometer | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-80x80cm-150w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-4.webp
+- Garden Highpro Complete 120×60cm 300W LED | €371.70 | Alles inbegrepen behalve voeding | URL: https://www.growdeal.nl/garden-highpro-complete-kweektent-120x60cm-300w-led/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/11/garden-highpro-garden-highpro-growkit-kweektent-2.webp
+
+EIGEN COMPLETE KITS bevatten: tent + 180W LED + ventilatie + filter + slangklemmen + clipfan + potten + rope ratchets + timer + accessoires. ALLEEN voeding toevoegen!
+- Complete Kweektent 80x80x180cm 180W LED PRO | €315.00 | URL: https://www.growdeal.nl/complete-kweektent-80x80x180cm-180w-led-pro/ | IMG: https://www.growdeal.nl/wp-content/uploads/2025/09/complete-kweektent-80x80x180cm-pro.png
+
+BIJ KLEINE HOMEGROWER (1-6 planten, <120cm tent):
+→ Stel DIRECT 1 complete kit voor als eerste product
+→ Voeg ALLEEN toe: voedingslijn (3-4 producten) + GEN200 + pH correctie
+→ NIET toevoegen: tent, lamp, ventilatie, potten, timer — dat zit er AL IN!
+→ Optioneel alternatief: Monster Soil Homegrow Pot (dan ook geen voeding nodig)
 
 HPS 600W KIT — altijd alle 3 samen (nooit alleen lamp):
 1. Ballast | Platinum Electronische VSA 600W | €43.50 | URL: https://www.growdeal.nl/platinum-electronische-vsa-600w-dimbaar/
@@ -902,6 +909,8 @@ function addMsg(role, text) {
   d.className = 'msg ' + role;
   let content = '';
   if (role === 'assistant') {
+    // Extra safety: strip any remaining JSON-like content
+    text = text.replace(/\{[\s\S]*?"products"[\s\S]*?\]/g, '').trim();
     const lines = text.split('\n');
     let inChoices = false;
     let choiceHtml = '';
@@ -1234,8 +1243,9 @@ async function sendMessage() {
     let jsonData = null;
     // ALWAYS strip JSON blocks from chat text first
     let chatText = raw
-      .replace(/<<+JSON>>+[\s\S]*?<<+ENDJSON>>+/g, '')
+      .replace(/<<+[A-Z]*>>+[\s\S]*?<<+[A-Z]*ENDJSON[A-Z]*>>+/g, '')
       .replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g, '')
+      .replace(/<<>>[\s\S]*?(?=\n\n|$)/g, '')
       .replace(/```json[\s\S]*?```/g, '')
       .replace(/```[\s\S]*?```/g, '')
       .trim();
