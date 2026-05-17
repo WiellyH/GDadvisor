@@ -399,7 +399,7 @@ ULTRA-COMPACT JSON — alles op 1 regel, reason max 5 woorden, geen spaties buit
 {"products":[{"name":"Productnaam","price":"€x","category":"Cat","reason":"Kort reden","url":"https://www.growdeal.nl/slug/","img":"https://www.growdeal.nl/wp-content/uploads/x.jpg","qty":1}]}
 <<<ENDJSON>>>
 Bij 20+ producten: ALLE producten in 1 JSON blok. Nooit splitsen over meerdere berichten.
-Reason MAXIMAAL 5 woorden — liever korter dan afkappen.
+Reason MAXIMAAL 4 woorden. Chat tekst max 50 woorden. Kort = sneller.
 
 BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit de productlijst):
 - LED met GEÏNTEGREERDE driver (alles in één): Sunpro Hitter 720W ECO €158.82 (#1 omzet), Platinum King LED ECO 720W €133.61, Lumen King 720W €159.62, Platinum QB 240W €74.36
@@ -1887,7 +1887,9 @@ function clearImage() {
 
 async function sendMessage() {
   const text = inputEl.value.trim();
-  if (!text) return;
+  // Allow sending with just an image
+  if (!text && !pendingImageBase64) return;
+  const sendText = text || '📷 Analyseer deze plant — wat zie je en wat moet ik doen?';
   inputEl.value = ''; inputEl.style.height = 'auto';
   document.getElementById('chips').style.display = 'none';
   sendBtn.disabled = true;
