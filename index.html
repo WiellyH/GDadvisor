@@ -185,13 +185,21 @@ function buildContextCatalog(query) {
   // Always include key categories for complete setups
   var categorySearches = [
     {terms: ['tent','kweektent','growbox','growzelt'], max: 3},
-    {terms: ['led','hps','lamp','licht','verlichting','ballast'], max: 3},
-    {terms: ['afzuiger','ventilat','filter','koolstof','luchtslang'], max: 3},
-    {terms: ['pot','kweekpot','stoffen'], max: 2},
-    {terms: ['voeding','meststof','biobizz','canna','dutchpro','plagron','nutrient'], max: 3},
-    {terms: ['ph','ec','meter','meting'], max: 2},
-    {terms: ['controller','timer','klimaat','thermostaat'], max: 2},
-    {terms: ['clipfan','slangklem','ratchet','rope'], max: 2},
+    {terms: ['led','hps','lamp','licht','verlichting','ballast'], max: 4},
+    {terms: ['afzuiger','ventilat','filter','koolstof','luchtslang'], max: 4},
+    {terms: ['pot','kweekpot','stoffen','fabric'], max: 3},
+    {terms: ['biobizz'], max: 3},
+    {terms: ['canna'], max: 3},
+    {terms: ['dutchpro'], max: 3},
+    {terms: ['plagron'], max: 3},
+    {terms: ['advanced nutrients','advanced'], max: 4},
+    {terms: ['atami','hesi','bac','aptus'], max: 2},
+    {terms: ['ph','ec','meter','aquamaster'], max: 3},
+    {terms: ['controller','timer','klimaat','thermostaat','hygrometer'], max: 3},
+    {terms: ['clipfan','slangklem','ratchet','rope','ophang'], max: 3},
+    {terms: ['gen200','flower bomb','calmag'], max: 3},
+    {terms: ['rhodos'], max: 3},
+    {terms: ['coco','substraat','aarde','soil'], max: 2},
   ];
   
   var allResults = [];
@@ -272,6 +280,12 @@ BESTSELLERS (gebruik deze kennis bij aanbevelingen, maar URLs komen ALTIJD uit d
 - Accessoires: Clipfan 15cm, RVS Slangklemmen, Rope Ratchet PRO altijd meenemen
 
 CORRECTE PRODUCTNAMEN — gebruik EXACT deze namen, nooit iets verzinnen:
+Coco substraat heet: "Canna Coco Professional Plus" of zoek op "coco substraat" — NIET Rhodos.
+Rhodos is een COMPLETE VOEDINGSLIJN (geen substraat!) met vaste verhouding:
+- Rhodos Base 4 delen (basisbemesting)
+- Rhodos Grow 2 delen (groeifase)  
+- Rhodos Bloom 6 delen (bloeifase)
+Altijd alle 3 samen aanbevelen als klant Rhodos kiest. Goede keuze voor professionele growers.
 DutchPro voeding heet: "DutchPro Grow Hydro/Coco A & B" en "DutchPro Bloom Hydro/Coco A & B" (voor coco)
 DutchPro voeding heet: "DutchPro Grow Soil A & B" en "DutchPro Bloom Soil A & B" (voor aarde)
 DutchPro heeft GEEN product dat "Base" heet — dit bestaat niet
