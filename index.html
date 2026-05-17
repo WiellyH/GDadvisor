@@ -99,7 +99,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 <body>
 <div id="topbar">
   <a href="https://www.growdeal.nl" target="_blank" style="display:flex;align-items:center;text-decoration:none">
-    <img src="https://www.growdeal.nl/wp-content/uploads/2024/10/logo-growdeal-transparant.png" 
+    <img src="https://www.growdeal.nl/wp-content/uploads/2024/10/Ontwerp-zonder-titel-1.png" 
          alt="GrowDeal.nl" 
          style="height:32px;width:auto;object-fit:contain"
          onerror="this.outerHTML='<div class=\'logo\'>G</div>'">
@@ -521,7 +521,7 @@ Alleen losse lamp aanbevelen als klant expliciet vraagt om vervanglamp.
 
 LICHT BEREKENING — praktisch en realistisch:
 
-BESCHIKBARE TENT MATEN (alleen deze op voorraad aanbevelen):
+TENT MATEN — adviseer ook als niet op voorraad, vermeld dan levertijd:
 Beschikbare maten: 40×40, 60×60, 80×80, 100×100, 120×120, 150×150, 240×120, 240×240, 300×300cm
 ECO lijn (budget) en PRO lijn (steviger) beschikbaar in de meeste maten.
 
@@ -635,11 +635,12 @@ Wil je Flower Bomb erbij voor grotere toppen?
 
 REGELS voor vragen:
 - Begin elke keuzeregel ALTIJD met → (pijl naar rechts)
-- Stel MAXIMAAL 1 vraag per beurt — nooit meer
+- Stel MAXIMAAL 1 vraag per beurt — absoluut nooit meer dan 1
+- Stuur altijd JSON bij elke vraag — ook al is de offerte nog niet compleet
 - Vraag nooit iets wat je al weet uit de context
-- Na 2-3 beantwoorde vragen: bouw direct een complete offerte
-- Na offerte: altijd 1 upsell vraag stellen om offerte uit te breiden
-- Doel: zo volledig mogelijke offerte, niet zo snel mogelijk klaar
+- Na 1-2 beantwoorde vragen: bouw al een complete offerte, verfijn daarna
+- Na offerte: hooguit 1 korte upsell vraag
+- NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
 
 BELANGRIJK:
 - Bij vervolgvragen: voeg toe aan de offerte of update bestaande producten — NOOIT de hele offerte weggooien
@@ -723,11 +724,12 @@ Wil je Flower Bomb erbij voor grotere toppen?
 
 REGELS voor vragen:
 - Begin elke keuzeregel ALTIJD met → (pijl naar rechts)
-- Stel MAXIMAAL 1 vraag per beurt — nooit meer
+- Stel MAXIMAAL 1 vraag per beurt — absoluut nooit meer dan 1
+- Stuur altijd JSON bij elke vraag — ook al is de offerte nog niet compleet
 - Vraag nooit iets wat je al weet uit de context
-- Na 2-3 beantwoorde vragen: bouw direct een complete offerte
-- Na offerte: altijd 1 upsell vraag stellen om offerte uit te breiden
-- Doel: zo volledig mogelijke offerte, niet zo snel mogelijk klaar
+- Na 1-2 beantwoorde vragen: bouw al een complete offerte, verfijn daarna
+- Na offerte: hooguit 1 korte upsell vraag
+- NOOIT 3 vragen tegelijk — ook niet via keuze knoppen
 
 BELANGRIJK:
 - Bij vervolgvragen: voeg toe aan de offerte of update bestaande producten — NOOIT de hele offerte weggooien
@@ -802,18 +804,25 @@ function addMsg(role, text) {
     let inChoices = false;
     let choiceHtml = '';
     lines.forEach(function(line) {
-      // Match: optional spaces + arrow (→ or ->) + space + A) or 1) etc + text
       const m = line.match(/^\s*[→\-\>]+\s*([A-Fa-f1-9][)\.]\s*.{2,})/);
       if (m) {
         if (!inChoices) { inChoices = true; choiceHtml = '<div class="choices">'; }
         choiceHtml += '<button class="choice-btn" onclick="pickChoice(this)">' + m[1].trim() + '</button>';
       } else {
-        if (inChoices) { content += choiceHtml + '</div>'; inChoices = false; choiceHtml = ''; }
+        if (inChoices) {
+          // Always add "Anders, namelijk..." option
+          choiceHtml += '<button class="choice-btn choice-custom" data-custom="true" onclick="pickChoice(this)" style="border-style:dashed;color:var(--muted)">✏️ Anders, namelijk... (typ in de chat hieronder)</button>';
+          content += choiceHtml + '</div>';
+          inChoices = false; choiceHtml = '';
+        }
         const bold = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         if (bold.trim()) content += '<p>' + bold + '</p>';
       }
     });
-    if (inChoices) content += choiceHtml + '</div>';
+    if (inChoices) {
+      choiceHtml += '<button class="choice-custom" data-custom="true" onclick="pickChoice(this)" style="border-style:dashed;color:var(--muted);background:var(--white);border:1.5px dashed var(--border);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;text-align:left;width:100%">✏️ Anders, namelijk... (typ in de chat hieronder)</button>';
+      content += choiceHtml + '</div>';
+    }
   } else {
     content = '<p>' + text + '</p>';
   }
@@ -823,6 +832,17 @@ function addMsg(role, text) {
 }
 
 function pickChoice(btn) {
+  const isCustom = btn.dataset.custom === 'true';
+  if (isCustom) {
+    // Focus input with placeholder hint
+    inputEl.focus();
+    inputEl.placeholder = 'Typ hier je antwoord en druk op Enter...';
+    inputEl.style.borderColor = 'var(--green)';
+    setTimeout(() => { inputEl.placeholder = 'Beschrijf je kweeksituatie of stel een vraag...'; inputEl.style.borderColor = ''; }, 8000);
+    // Scroll to input
+    inputEl.scrollIntoView({behavior: 'smooth'});
+    return;
+  }
   // Disable ALL choice groups in the conversation (prevent double answering)
   document.querySelectorAll('.choice-btn').forEach(function(b) {
     b.disabled = true; b.style.opacity = '0.4';
@@ -933,7 +953,7 @@ function renderProducts(products, seo) {
             '<button class="qty-btn" onclick="changeQty(this,1)">+</button>' +
           '</div>' +
           '<span class="product-price line-price" data-unit="' + priceNum + '">€' + lineTotal.toFixed(2) + '</span>' +
-          '<span class="product-stock"></span>' +
+          '<span class="product-stock" style="font-size:10px;color:' + (p.inStock === false ? '#e67e22' : '#27ae60') + '">' + (p.inStock === false ? '⚠ langere levertijd' : '') + '</span>' +
           '<button class="btn-cart" onclick="addToCart(' + i + ')">Winkelmandje →</button>' +
           '<button class="btn-del" onclick="removeProduct(this)">✕</button>' +
         '</div>' +
@@ -1097,7 +1117,12 @@ async function sendMessage() {
     
     // Parse JSON from response
     let jsonData = null;
-    let chatText = raw;
+    // ALWAYS strip JSON blocks from chat text first
+    let chatText = raw
+      .replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g, '')
+      .replace(/```json[\s\S]*?```/g, '')
+      .replace(/```[\s\S]*?```/g, '')
+      .trim();
     const tagMatch = raw.match(/<<<JSON>>>([\s\S]*?)<<<ENDJSON>>>/);
     const tickMatch = raw.match(/```json([\s\S]*?)```/);
     const rawCand = tagMatch ? tagMatch[1] : tickMatch ? tickMatch[1] : null;
@@ -1150,8 +1175,9 @@ async function sendMessage() {
               reason: item.reason || item.reden || item.doel || item.omschrijving || item.note || item.recommendation || item.calculation || '',
               url: item.url || item.link || '',
               img: item.img || item.afbeelding || item.image || '',
-              id: (item.id && item.id > 100) ? item.id : 0, // ignore sequential ids like 1,2,3
+              id: (item.id && item.id > 100) ? item.id : 0,
               qty: item.qty || item.aantal || 1,
+              inStock: item.inStock !== false,
               emoji: item.emoji || ''
             };
           }).filter(function(item) {
@@ -1159,7 +1185,6 @@ async function sendMessage() {
             return item.url && item.url.includes('growdeal.nl') && item.name;
           });
           jsonData = p;
-          chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
         }
       } catch(e) {
         try {
@@ -1184,7 +1209,6 @@ async function sendMessage() {
               return item.url && item.url.includes('growdeal.nl') && item.name;
             });
             jsonData = p;
-            chatText = raw.replace(/<<<JSON>>>[\s\S]*?<<<ENDJSON>>>/g,'').replace(/```json[\s\S]*?```/g,'').trim();
           }
         } catch(e2) { console.error('JSON parse failed:', e2.message, rawCand ? rawCand.slice(0,300) : 'no candidate'); }
       }
