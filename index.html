@@ -929,8 +929,12 @@ function getSystem(query) {
     prefContext += '\nKLANT HEEFT AANTALLEN AANGEPAST: ' + changedQty.map(c => c.name + ' → ' + c.qty + 'x').join(', ');
   }
   if (offerteProds.length > 0) {
-    const currentNames = offerteProds.map(p => p.name + (p.qty > 1 ? ' ('+p.qty+'x)' : '')).join(', ');
-    prefContext += '\nHUIDIGE OFFERTE BEVAT: ' + currentNames;
+    prefContext += '\n\nHUIDIGE OFFERTE (genummerd — gebruik deze nummers bij verwijderen/vervangen):\n';
+    offerteProds.forEach(function(p, i) {
+      prefContext += (i+1) + '. ' + p.name + ' | ' + p.price + ' | qty:' + (p.qty||1) + ' | cat:' + (p.category||'') + '\n';
+    });
+    prefContext += '\nBij verwijderen: stuur {"name":"[exacte naam]","remove":true}';
+    prefContext += '\nBij vervangen: stuur het nieuwe product, het oude wordt automatisch vervangen op basis van merk/categorie.';
   }
   
   return SYSTEM.replace('{CONTEXT}', ctxStr) + prefContext + dynamicCatalog;
@@ -1460,9 +1464,11 @@ async function sendMessage() {
             };
           }).filter(function(item) {
             if (item.remove === true) {
-              // Remove this product from offer
+              var removeName = (item.name || '').toLowerCase();
+              // Match on full name OR partial name (first 20 chars)
               offerteProds = offerteProds.filter(function(op) {
-                return op.name && item.name && op.name.toLowerCase() !== item.name.toLowerCase();
+                var opName = (op.name || '').toLowerCase();
+                return !opName.includes(removeName.slice(0,20)) && !removeName.includes(opName.slice(0,20));
               });
               return false;
             }
